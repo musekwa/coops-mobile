@@ -433,7 +433,7 @@ const PersonalInfoScreen = ({
 			</View>
 
 			{/* Birth Date */}
-			<View className="flex-1 justify-center">
+			<View className="">
 				<Controller
 					control={control}
 					name="birthDate"
@@ -1274,7 +1274,7 @@ export default function AddIndividualFarmer() {
 				scrollEventThrottle={16}
 				contentContainerStyle={{
 					flexGrow: 1,
-					paddingBottom: 80,
+					paddingBottom: 200,
 					paddingTop: 20,
 					paddingHorizontal: 16,
 				}}

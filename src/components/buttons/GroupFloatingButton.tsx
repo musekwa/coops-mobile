@@ -39,6 +39,14 @@ export function GroupFloatingButton({ categories }: { categories: Props }) {
 				open={isOpen}
 				visible={pathname === '/actors'}
 				theme={{ colors: { primary: colors.primary, background: colorScheme === 'dark' ? '#000000' : '#ffffff' } }}
+				fabStyle={{
+					backgroundColor: colors.primary,
+					elevation: 0,
+					shadowOpacity: 0,
+					shadowRadius: 0,
+					shadowOffset: { width: 0, height: 0 },
+				}}
+				color={colors.white}
 				icon={isOpen ? 'close' : 'plus'}
 				actions={categories.map((category) => ({
 					icon: (props: any) => {

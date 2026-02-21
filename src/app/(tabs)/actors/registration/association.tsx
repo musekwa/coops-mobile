@@ -1,6 +1,5 @@
 import { RelativePathString, useNavigation } from 'expo-router'
 import { useEffect, useState } from 'react'
-import { View } from 'react-native'
 import BackButton from 'src/components/buttons/BackButton'
 import OrganizationDataPreview from 'src/components/data-preview/OrganizationDataPreview'
 import ErrorAlert from 'src/components/dialogs/ErrorAlert'

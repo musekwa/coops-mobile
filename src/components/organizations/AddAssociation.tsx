@@ -732,7 +732,7 @@ export default function AddAssociationForm({ setPreviewData, setErrorMessage, se
 				showsVerticalScrollIndicator={false}
 				scrollEventThrottle={16}
 				contentContainerStyle={{
-					paddingBottom: 60,
+					paddingBottom: 200,
 					paddingTop: 20,
 					alignItems: 'center',
 				}}
@@ -741,7 +741,7 @@ export default function AddAssociationForm({ setPreviewData, setErrorMessage, se
 				{screens[currentScreen].component}
 			</KeyboardAwareScrollView>
 
-			<View className="absolute bottom-12 left-6 right-6">
+			<View className="absolute bottom-8 left-6 right-6">
 				<NextAndPreviousButtons
 					// currentStep={currentScreen}
 					handlePreviousStep={handlePrevious}

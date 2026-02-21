@@ -364,11 +364,13 @@ export default function SaveFarmer() {
 	}, [farmer, userDetails, partialAddress, fullAddress, nationality])
 
 	return (
-		<CustomSafeAreaView>
+		<CustomSafeAreaView edges={['bottom']}>
 		<Animated.ScrollView
 			showsVerticalScrollIndicator={false}
 			contentContainerStyle={{
-				paddingBottom: 60,
+				paddingBottom: 80,
+				paddingTop: 10,
+				paddingHorizontal: 16,
 			}}
 			entering={FadeIn.duration(300)}
 		>

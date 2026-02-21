@@ -716,7 +716,7 @@ export default function AddCoopForm({ setPreviewData, setErrorMessage, setHasErr
 				showsVerticalScrollIndicator={false}
 				scrollEventThrottle={16}
 				contentContainerStyle={{
-					paddingBottom: 60,
+					paddingBottom: 200,
 					paddingTop: 20,
 					alignItems: 'center',
 				}}

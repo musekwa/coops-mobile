@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Connect Caju",
-    "slug": "connectcaju",
+    "name": "MyCoop",
+    "slug": "mycoop",
     "version": "1.0.4",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
-    "scheme": "connectcaju",
+    "scheme": "mycoop",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -46,7 +46,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.iam.connectcaju2",
+      "package": "com.ampcm.mycoop",
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
@@ -70,7 +70,7 @@
       [
         "expo-localization",
         {
-          "locationAlwaysAndWhenInUsePermission": "Autorizar $(Connect Caju) para obter sua localização.",
+          "locationAlwaysAndWhenInUsePermission": "Autorizar $(MyCoop) para obter sua localização.",
           "isAndroidBackgroundLocationEnabled": false
         }
       ],
@@ -105,7 +105,7 @@
         "@sentry/react-native/expo",
         {
           "url": "https://sentry.io/",
-          "project": "connectcaju",
+          "project": "mycoop",
           "organization": "iam-ip"
         }
       ],
@@ -120,13 +120,11 @@
         "origin": false
       },
       "eas": {
-        "projectId": "588a3599-99ca-4aee-a6d9-04f9434f8e06"
+        "projectId": "7fdcabb1-b587-472a-9a13-ab58f290e65f"
       }
     },
     "owner": "evar",
     "runtimeVersion": "1.0.4",
-    "updates": {
-      "url": "https://u.expo.dev/588a3599-99ca-4aee-a6d9-04f9434f8e06"
-    }
+    "updates": {}
   }
 }

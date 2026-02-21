@@ -28,7 +28,7 @@ export default function NextAndPreviousButtons({
 	const isKeyboardVisible = useKeyboardVisibility()
 	if (isKeyboardVisible) return null
 	return (
-		<View className="flex flex-row justify-between pb-6 w-full">
+		<View className="flex flex-row justify-between w-full">
 			{showPreviousButton && (
 				<TouchableOpacity
 					activeOpacity={0.5}

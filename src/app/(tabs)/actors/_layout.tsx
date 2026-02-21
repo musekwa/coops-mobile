@@ -21,7 +21,10 @@ export default function ActorsLayout() {
 				headerBackVisible: false
 				}}
 				/>
-				<Stack.Screen name="registration" />
+				<Stack.Screen name="registration" options={{
+					headerShown: false,
+					headerBackVisible: false
+				}} />
 				<Stack.Screen
 					name="farmers"
 					options={{
