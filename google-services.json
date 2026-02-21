@@ -1,0 +1,29 @@
+{
+	"project_info": {
+		"project_number": "203127539373",
+		"project_id": "connectcaju2",
+		"storage_bucket": "connectcaju2.appspot.com"
+	},
+	"client": [
+		{
+			"client_info": {
+				"mobilesdk_app_id": "1:203127539373:android:b85975f5716f015239a824",
+				"android_client_info": {
+					"package_name": "com.iam.connectcaju2"
+				}
+			},
+			"oauth_client": [],
+			"api_key": [
+				{
+					"current_key": "AIzaSyANHSha1lvWuWHwXUvxPcpIebT9av2j62k"
+				}
+			],
+			"services": {
+				"appinvite_service": {
+					"other_platform_oauth_client": []
+				}
+			}
+		}
+	],
+	"configuration_version": "1"
+}

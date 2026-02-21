@@ -1,0 +1,61 @@
+import { View } from 'react-native'
+import React from 'react'
+import { ScrollView } from 'react-native'
+import { capitalize } from 'src/helpers/capitalize'
+import { match } from 'ts-pattern'
+import { CoopAffiliationStatus, CoopPurpose } from 'src/types'
+import { CoopFormDataType } from 'src/store/organizations'
+import FormFieldPreview from '../data-preview/FormFieldPreview'
+import { Divider } from 'react-native-paper'
+
+
+type PreviewCoopProps = {
+	org: CoopFormDataType
+	adminPostName: string
+	villageName: string
+}
+
+export default function PreviewCoop({ org, adminPostName, villageName }: PreviewCoopProps) {
+
+	const legalStatus =
+		org.affiliationStatus === CoopAffiliationStatus.AFFILIATED
+			? 'Legalizada'
+			: org.affiliationStatus === CoopAffiliationStatus.NOT_AFFILIATED
+				? 'Não Legalizada'
+				: org.affiliationStatus === CoopAffiliationStatus.AFFILIATION_ON_PROCESS
+					? 'Em Processo de Legalização'
+					: 'Não Especificada'
+
+	return (
+		<ScrollView
+			showsVerticalScrollIndicator={false}
+			contentContainerStyle={{
+				paddingBottom: 60,
+			}}
+			className="space-y-3"
+		>
+			<FormFieldPreview title="Cooperativa:" value={capitalize(org.name)} />
+			<Divider />
+			<FormFieldPreview title="Ano de Criação:" value={String(org.creationYear)} />
+			<FormFieldPreview title="Situação Legal:" value={legalStatus} />
+			{org.affiliationStatus === CoopAffiliationStatus.AFFILIATED && (
+				<FormFieldPreview
+					title="Ano de Legalização:"
+					value={org.affiliationYear ? org.affiliationYear : 'Ainda Não Legalizada'}
+				/>
+			)}
+			<Divider />
+			<FormFieldPreview title="Endereço (Posto Administrativo):" value={adminPostName} />
+
+			<FormFieldPreview title="Endereço (Localidade):" value={villageName} />
+
+			<Divider />
+
+			<View className="flex flex-col py-3">
+				<FormFieldPreview title={'Documentação (Alvará):'} value={org.license ? org.license : 'Nenhum'} />
+				<FormFieldPreview title="Documentação (NUEL):" value={org.nuel ? org.nuel : 'Nenhum'} />
+				<FormFieldPreview title="Documentação (NUIT):" value={org.nuit ? org.nuit : 'Nenhum'} />
+			</View>
+		</ScrollView>
+	)
+}

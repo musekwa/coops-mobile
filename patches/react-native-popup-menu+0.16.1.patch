@@ -1,0 +1,68 @@
+diff --git a/node_modules/react-native-popup-menu/build/rnpm.js b/node_modules/react-native-popup-menu/build/rnpm.js
+index 1111c2d..b3b3d81 100644
+--- a/node_modules/react-native-popup-menu/build/rnpm.js
++++ b/node_modules/react-native-popup-menu/build/rnpm.js
+@@ -1829,6 +1829,7 @@
+       _this._menuRegistry = makeMenuRegistry();
+       _this._isMenuClosing = false;
+       _this._isBackHandlerRegistered = false;
++      _this._backHandlerSubscription = null;
+       var menuActions = {
+         openMenu: function openMenu(name) {
+           return _this.openMenu(name);
+@@ -1880,8 +1881,10 @@
+       value: function componentWillUnmount() {
+         debug('unmounting menu provider');
+ 
+-        if (this._isBackHandlerRegistered) {
+-          reactNative.BackHandler.removeEventListener('hardwareBackPress', this._handleBackButton);
++        if (this._backHandlerSubscription) {
++          this._backHandlerSubscription.remove();
++          this._backHandlerSubscription = null;
++          this._isBackHandlerRegistered = false;
+         }
+ 
+         var skipInstanceCheck = this.props.skipInstanceCheck;
+@@ -1910,7 +1913,7 @@
+         if (!this._isBackHandlerRegistered) {
+           // delay menu registration until the menu is really opened (and thus this back handler will be called "sooner")
+           // too soon registration can cause another back handlers (e.g. react navigation) to be called instead of our back handler
+-          reactNative.BackHandler.addEventListener('hardwareBackPress', this._handleBackButton);
++          this._backHandlerSubscription = reactNative.BackHandler.addEventListener('hardwareBackPress', this._handleBackButton);
+           this._isBackHandlerRegistered = true;
+         }
+ 
+diff --git a/node_modules/react-native-popup-menu/src/MenuProvider.js b/node_modules/react-native-popup-menu/src/MenuProvider.js
+index b4d7e96..847e8d1 100644
+--- a/node_modules/react-native-popup-menu/src/MenuProvider.js
++++ b/node_modules/react-native-popup-menu/src/MenuProvider.js
+@@ -30,6 +30,7 @@ export default class MenuProvider extends Component {
+     this._menuRegistry = makeMenuRegistry();
+     this._isMenuClosing = false;
+     this._isBackHandlerRegistered = false;
++    this._backHandlerSubscription = null;
+     const menuActions = {
+       openMenu: name => this.openMenu(name),
+       closeMenu: () => this.closeMenu(),
+@@ -76,8 +77,10 @@ export default class MenuProvider extends Component {
+ 
+   componentWillUnmount() {
+     debug('unmounting menu provider')
+-    if (this._isBackHandlerRegistered) {
+-      BackHandler.removeEventListener('hardwareBackPress', this._handleBackButton);
++    if (this._backHandlerSubscription) {
++      this._backHandlerSubscription.remove();
++      this._backHandlerSubscription = null;
++      this._isBackHandlerRegistered = false;
+     }
+     const { skipInstanceCheck } = this.props;
+     if (!skipInstanceCheck) {
+@@ -99,7 +102,7 @@ export default class MenuProvider extends Component {
+     if (!this._isBackHandlerRegistered) {
+       // delay menu registration until the menu is really opened (and thus this back handler will be called "sooner")
+       // too soon registration can cause another back handlers (e.g. react navigation) to be called instead of our back handler
+-      BackHandler.addEventListener('hardwareBackPress', this._handleBackButton);
++      this._backHandlerSubscription = BackHandler.addEventListener('hardwareBackPress', this._handleBackButton);
+       this._isBackHandlerRegistered = true;
+     }
+     menu.instance._setOpened(true);

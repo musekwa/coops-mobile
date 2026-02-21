@@ -1,0 +1,85 @@
+# Define sync rules to control which data is synced to each user
+# See the docs: https://docs.powersync.com/usage/sync-rules
+bucket_definitions:
+  global:
+    priority: 3
+    data:
+      # All users can see all traders
+      - SELECT * FROM traders
+      - SELECT * FROM contacts
+      - SELECT * FROM addresses
+      - SELECT * FROM births
+      - SELECT * FROM documents
+      - SELECT * FROM warehouse_details
+      - SELECT * FROM cashew_warehouse_transactions
+      - SELECT * FROM countries
+      - SELECT * FROM provinces
+      - SELECT * FROM districts
+      - SELECT * FROM admin_posts
+      - SELECT * FROM villages
+      - SELECT * FROM identification_documents
+      - SELECT * FROM nuits
+      - SELECT * FROM actors
+      - SELECT * FROM actor_documents
+      - SELECT * FROM birth_places
+      - SELECT * FROM birth_dates
+      - SELECT * FROM contact_details
+      - SELECT * FROM address_details
+      - SELECT * FROM farmer_details
+      - SELECT * FROM worker_assignments
+      - SELECT * FROM warehouse_details
+      - SELECT * FROM facilities
+      - SELECT * FROM actor_details
+      - SELECT * FROM actor_categories
+      - SELECT * FROM genders
+      - SELECT * FROM dependents
+      - SELECT * FROM nuels
+      - SELECT * FROM licenses
+      - SELECT * FROM cashew_shipments
+      - SELECT * FROM checkpoints
+      # - SELECT * FROM shipment_checkpoints // DEPRECATED: replaced by checkpoints
+      - SELECT * FROM shipment_loads
+      - SELECT * FROM shipment_drivers
+      - SELECT * FROM shipment_cars
+      - SELECT * FROM shipment_directions
+      - SELECT * FROM shipment_checks
+      - SELECT * FROM shipment_checkpoint_inspectors
+
+  by_user:
+    priority: 0
+    parameters:
+      - SELECT request.user_id() as user_id
+    data:
+      - SELECT * FROM user_details WHERE user_id = bucket.user_id
+
+  higher_priority:
+    priority: 0
+    parameters:
+      # - SELECT (request.parameters() ->> 'client_sync_id') as client_sync_id
+      - SELECT district_id from user_details WHERE user_details.user_id = request.user_id()
+    data:
+      # - filtering farmers by user district (famers.sync_id = user_details.district)
+      - SELECT * FROM districts WHERE id = bucket.district_id
+
+  by_district:
+    priority: 1
+    parameters:
+      # - SELECT (request.parameters() ->> 'client_sync_id') as client_sync_id
+      - SELECT district_id from user_details WHERE user_details.user_id = request.user_id()
+    data:
+      # - filtering farmers by user district (famers.sync_id = user_details.district)
+      - SELECT * FROM farmers WHERE sync_id = bucket.district_id
+
+      - SELECT * FROM actors WHERE category = 'GROUP' AND sync_id = bucket.district_id
+
+        # - filtering group members by user district (group_members.sync_id = user_details.district)
+      - SELECT * FROM group_members WHERE sync_id = bucket.district_id
+
+      # - filtering organization_transactions by user district
+      - SELECT * FROM organization_transactions WHERE sync_id = bucket.district_id
+
+      # - filtering organization_transaction_participants by user district
+      - SELECT * FROM organization_transaction_participants WHERE sync_id = bucket.district_id
+
+      # - filter group managers by user district
+      - SELECT * FROM group_managers WHERE sync_id = bucket.district_id
