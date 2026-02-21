@@ -87,7 +87,7 @@ export default function PasswordReset() {
 				scrollEventThrottle={16}
 				contentContainerStyle={{
 					flexGrow: 1,
-					// padding: 15,
+					padding: 16,
 					paddingBottom: 40,
 				}}
 				className="bg-white dark:bg-black"

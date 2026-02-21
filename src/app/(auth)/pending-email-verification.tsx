@@ -83,6 +83,7 @@ export default function PendingEmailVerification() {
 				scrollEventThrottle={16}
 				contentContainerStyle={{
 					flexGrow: 1,
+					padding: 16,
 					paddingBottom: 40,
 				}}
 			>

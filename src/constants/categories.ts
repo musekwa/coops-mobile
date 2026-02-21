@@ -1,12 +1,8 @@
 import { ActorCategory, CategoryCardType, OrganizationTypes } from 'src/types'
 import {
-	actorOrganizationsImageUri,
 	associationCategoryImageUri,
 	cooperativeCategoryImageUri,
 	farmerCategoryImageUri,
-	processorCategoryImageUri,
-	sprayerCategoryImageUri,
-	traderCategoryImageUri,
 	unionCategoryImageUri,
 } from './imageURI'
 
@@ -64,7 +60,7 @@ export const categoryOptions = [
 		title: 'Cooperativa',
 		icon: 'hand-holding-dollar',
 		description: '',
-		imageUri: traderCategoryImageUri,
+		imageUri: cooperativeCategoryImageUri,
 	},
 	{
 		actorCategory: ActorCategory.ASSOCIATION,
@@ -88,29 +84,7 @@ export const categoriesCardDetails: CategoryCardType[] = [
 		description: 'Familiares e Comerciais.',
 		title: 'Produtores',
 		bannerImage: farmerCategoryImageUri,
-		// icon: 'account',
 	},
-	// {
-	// 	actorCategory: ActorCategory.SERVICE_PROVIDER,
-	// 	description: 'Serviços de pulverização.',
-	// 	title: 'Provedores de Serviços',
-	// 	bannerImage: sprayerCategoryImageUri,
-	// 	// icon: 'account',
-	// },
-	// {
-	// 	actorCategory: ActorCategory.TRADER,
-	// 	description: 'Primários, Intermediários e Finais.',
-	// 	title: 'Comerciantes',
-	// 	bannerImage: traderCategoryImageUri,
-	// 	// icon: 'account',
-	// },
-	// {
-	// 	actorCategory: ActorCategory.PROCESSOR,
-	// 	description: 'Processadores Industriais e Artesanais.',
-	// 	title: 'Processadores',
-	// 	bannerImage: processorCategoryImageUri,
-	// 	// icon: 'account',
-	// },
 	{
 		actorCategory: ActorCategory.COOPERATIVE,
 		description: 'Cooperativas de produtores.',

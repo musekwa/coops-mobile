@@ -7,9 +7,8 @@ export const useStyles = () => {
     }
     const headerTitleStyle = {
         color: isDarkMode ? 'white' : 'black',
-        fontSize: 14,	
-        fontWeight: 'bold',
-        backgroundColor: isDarkMode ? 'black' : 'white',
+        fontSize: 14,
+        fontWeight: 'bold' as const,
     }
     return {
         isDarkMode,

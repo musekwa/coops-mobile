@@ -78,7 +78,7 @@ export default function ForgotPassword() {
 				scrollEventThrottle={16}
 				contentContainerStyle={{
 					flexGrow: 1,
-					// padding: 15,
+					padding: 16,
 					paddingBottom: 40,
 				}}
 			>

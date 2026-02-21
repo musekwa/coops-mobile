@@ -18,6 +18,7 @@ export default function SignUp() {
 				scrollEventThrottle={16}
 				contentContainerStyle={{
 					flexGrow: 1,
+					padding: 16,
 					paddingBottom: 40,
 				}}
 				className="bg-white dark:bg-black"

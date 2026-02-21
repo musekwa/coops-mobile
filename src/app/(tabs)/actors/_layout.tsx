@@ -5,30 +5,64 @@ import { StatusBar } from 'expo-status-bar'
 
 export default function ActorsLayout() {
 	const { headerStyle, headerTitleStyle } = useStyles()
+
+	const stackHeaderTitleStyle = {
+		color: headerTitleStyle.color,
+		fontSize: headerTitleStyle.fontSize,
+		fontWeight: 'bold' as const,
+	}
+
 	return (
 		<>
-			<Stack
-				screenOptions={{
-					headerShown: false,
+			<Stack>
+				<Stack.Screen name="index" 
+				options={{
+				headerShown: false,
+				headerBackVisible: false
 				}}
-			>
-				<Stack.Screen name="index" />
+				/>
 				<Stack.Screen name="registration" />
 				<Stack.Screen
 					name="farmers"
 					options={{
+						headerShown: true,
+					headerShadowVisible: false,
 						headerTitle: 'Produtores',
 						headerTitleAlign: 'center',
-						headerTitleStyle: headerTitleStyle,
+						headerTitleStyle: stackHeaderTitleStyle,
 						headerStyle: headerStyle,
 					}}
 				/>
 				<Stack.Screen
-					name="traders"
+					name="cooperatives"
 					options={{
-						headerTitle: 'Comerciantes',
+						headerShown: true,
+						headerShadowVisible: false,
+						headerTitle: 'Cooperativas',
 						headerTitleAlign: 'center',
-						headerTitleStyle: headerTitleStyle,
+						headerTitleStyle: stackHeaderTitleStyle,
+						headerStyle: headerStyle,
+					}}
+				/>
+				<Stack.Screen
+					name="coop-unions"
+					options={{
+						headerShown: true,
+						headerShadowVisible: false,
+						headerTitle: 'Uniões das Cooperativas',
+						headerTitleAlign: 'center',
+						headerTitleStyle: stackHeaderTitleStyle,
+						headerStyle: headerStyle,
+					}}
+				/>
+				<Stack.Screen
+					name="associations"
+					options={{
+						headerShown: true,
+						headerShadowVisible: false,
+						headerTitle: 'Associações',
+						headerTitleAlign: 'center',
+						headerTitleStyle: stackHeaderTitleStyle,
 						headerStyle: headerStyle,
 					}}
 				/>

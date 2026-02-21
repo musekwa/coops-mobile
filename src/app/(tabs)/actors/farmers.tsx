@@ -14,12 +14,11 @@ import ActorListItem from 'src/components/actors/ActorListItem'
 import BackButton from 'src/components/buttons/BackButton'
 import CustomBottomSheetModal from 'src/components/modals/CustomBottomSheetModal'
 import CustomShimmerPlaceholder from 'src/components/placeholder/CustomShimmerPlaceholder'
-import RenderTabBar from 'src/components/category-tab/RenderTabBar'
 import SingleFloatingButton from 'src/components/buttons/SingleFloatingButton'
 import SkeletonLoader from 'src/components/skeleton/SkeletonLoader'
 
 // Hooks
-import { useHeaderOptions, useNavigationSearch } from 'src/hooks/useNavigationSearch'
+import { useNavigationSearch } from 'src/hooks/useNavigationSearch'
 
 import { MultiCategory, ResourceName } from 'src/types'
 
@@ -30,10 +29,22 @@ import { useQueryMany, useSearchOptions, useUserDetails } from 'src/hooks/querie
 import { TABLES } from 'src/library/powersync/schemas/AppSchema'
 import { useActionStore } from 'src/store/actions/actions'
 import EmptyPlaceholder from 'src/components/not-found/EmptyPlaceholder'
+import { getDistrictById } from 'src/library/sqlite/selects'
+import CustomSafeAreaView from 'src/components/layouts/safe-area-view'
 
 type Item = {
 	title: string
 	category: string
+}
+
+type FarmerItem = {
+	id: string
+	surname: string
+	other_names: string
+	multicategory: string
+	admin_post_id: string
+	primary_phone: string
+	secondary_phone: string
 }
 
 const items: Item[] = [
@@ -44,8 +55,9 @@ const items: Item[] = [
 ]
 
 export default function FarmersScreen() {
-	const { userDetails } = useUserDetails()
+	const { userDetails, isLoading: isUserLoading } = useUserDetails()
 	const { resetCurrentResource } = useActionStore()
+	const [locationName, setLocationName] = useState<string>('')
 
 	const { search, setSearch } = useNavigationSearch({
 		searchBarOptions: {
@@ -91,10 +103,6 @@ export default function FarmersScreen() {
 	)
 
 	const [activeTab, setActiveTab] = useState('')
-	const handleActiveTab = (tab: string) => {
-		setActiveTab(tab)
-		setIsLoading(true)
-	}
 
 	const filteredFarmers = useMemo(() => {
 		// Ensure farmersWithAdminPostAndContact is an array
@@ -137,9 +145,14 @@ export default function FarmersScreen() {
 	}, [search, farmersWithAdminPostAndContact, activeTab, newSearchKey])
 
 	// Update header options
-	useHeaderOptions({}, 'Produtores')
 	useEffect(() => {
 		navigation.setOptions({
+			headerTitle: () => (
+				<View className="items-center">
+					<Text className="text-black dark:text-white text-[14px] font-bold">{locationName}</Text>
+					<Text className="text-gray-600 dark:text-gray-400 font-mono text-[12px]">Produtores</Text>
+				</View>
+			),
 			headerLeft: () => <BackButton route="/(tabs)/actors" />,
 			headerRight: () => (
 				<View className="mx-2">
@@ -155,7 +168,7 @@ export default function FarmersScreen() {
 
 		// reset current resource
 		resetCurrentResource()
-	}, [isSearchOptionsVisible])
+	}, [isSearchOptionsVisible, locationName])
 
 	const handleSearchKeys = () => {
 		// get all adminPosts
@@ -202,20 +215,31 @@ export default function FarmersScreen() {
 		}
 	}, [activeTab, isLoading])
 
+
+		// Fetch location name when userDetails becomes available
+		useEffect(() => {
+			const fetchLocationName = async () => {
+				if (userDetails?.district_id) {
+					try {
+						const district = await getDistrictById(userDetails.district_id) as string
+						setLocationName(district || '')
+					} catch (error) {
+						console.error('Error fetching district name:', error)
+						setLocationName('')
+					}
+				} else if (!isUserLoading) {
+					setLocationName('')
+				}
+			}
+	
+			fetchLocationName()
+		}, [userDetails?.district_id])
+
 	// Render each farmer with a photo, name, surname, phone number, and cashew stock
-	const renderItem = ({
-		item,
-	}: {
-		item: {
-			id: string
-			surname: string
-			other_names: string
-			multicategory: string
-			admin_post_id: string
-			primary_phone: string
-			secondary_phone: string
-		}
-	}) => <ActorListItem item={item} resource_name={ResourceName.FARMER} />
+	const renderItem = useCallback(
+		({ item }: { item: FarmerItem }) => <ActorListItem item={item} resource_name={ResourceName.FARMER} />,
+		[],
+	)
 
 	// Check if farmers array is undefined
 	// check if farmers array is undefined
@@ -249,81 +273,76 @@ export default function FarmersScreen() {
 
 	// Render the farmers in a flatlist
 	return (
-		<>
-			<View className="flex-1 bg-white dark:bg-black">
-				<View>
-					<RenderTabBar items={items} activeTab={activeTab} handleActiveTab={handleActiveTab} />
-				</View>
+		<CustomSafeAreaView edges={['bottom']} style={{ paddingTop: 0 }}>
 
-				<View className="">
-					{isLoading ? (
-						<FlatList
-							showsVerticalScrollIndicator={false}
-							data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]}
-							numColumns={1}
-							keyExtractor={(item: number) => item.toString()}
-							renderItem={() => (
-								<View className=" items-center mx-3">
-									<CustomShimmerPlaceholder
-										// visible={isLoading}
-										style={{
-											width: '100%',
-											height: 60,
-											margin: 10,
-											borderRadius: 10,
-										}}
-									/>
-								</View>
-							)}
-						/>
-					) : (
-						<Animated.FlatList
-							className="bg-white dark:bg-black"
-							contentContainerStyle={{
-								flexGrow: 1,
-								paddingBottom: 100,
-							}}
-							data={filteredFarmers}
-							onScroll={scrollHandler}
-							scrollEventThrottle={16}
-							showsVerticalScrollIndicator={false}
-							renderItem={renderItem}
-							keyExtractor={(item: { id: string }) => item.id}
-							ListEmptyComponent={() => (
-								<View className="flex-1 items-center justify-center h-[400px]">
-									<EmptyPlaceholder message="Não há produtores para mostrar" />
-								</View>
-							)}
-						/>
-					)}
-				</View>
-
-				{/* Bottom Sheet Modal */}
-				<CustomBottomSheetModal handleDismissModalPress={handleModalPress} bottomSheetModalRef={bottomSheetModalRef}>
-					<View className="flex p-3">
-						<Text className="mx-8 text-black font-bold dark:text-white">Filtrar registos</Text>
-						<View className="space-y-4 pt-8">
-							{searchKeys.map((searchKey, index) => (
-								<TouchableOpacity onPress={() => handleSearchKey(searchKey.value)} key={index} className="mx-8">
-									<View className="flex flex-row space-x-3">
-										<View className="">
-											{newSearchKey === searchKey.value ? (
-												<Ionicons name="radio-button-on" size={24} color={isDarkMode ? colors.white : colors.primary} />
-											) : (
-												<Ionicons name="radio-button-off" size={24} color={isDarkMode ? colors.white : colors.black} />
-											)}
-										</View>
-										<View>
-											<Text className="text-black dark:text-white text-[14px]">{searchKey.label}</Text>
-										</View>
-									</View>
-								</TouchableOpacity>
-							))}
-						</View>
-					</View>
-				</CustomBottomSheetModal>
-				<SingleFloatingButton route="/(tabs)/actors/registration/farmer-registration" />
+			<View className="px-2">
+				{isLoading ? (
+					<FlatList
+						showsVerticalScrollIndicator={false}
+						data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]}
+						numColumns={1}
+						keyExtractor={(item: number) => item.toString()}
+						renderItem={() => (
+							<View className=" items-center mx-3">
+								<CustomShimmerPlaceholder
+									// visible={isLoading}
+									style={{
+										width: '100%',
+										height: 60,
+										margin: 10,
+										borderRadius: 10,
+									}}
+								/>
+							</View>
+						)}
+					/>
+				) : (
+					<Animated.FlatList<FarmerItem>
+						className="bg-white dark:bg-black"
+						contentContainerStyle={{
+							flexGrow: 1,
+							paddingBottom: 100,
+						}}
+						data={filteredFarmers}
+						onScroll={scrollHandler}
+						scrollEventThrottle={16}
+						showsVerticalScrollIndicator={false}
+						renderItem={renderItem}
+						keyExtractor={(item) => item.id}
+						ListEmptyComponent={() => (
+							<View className="flex-1 items-center justify-center h-[400px]">
+								<EmptyPlaceholder message="Não há produtores para mostrar" />
+							</View>
+						)}
+					/>
+				)}
 			</View>
-		</>
+
+			{/* Bottom Sheet Modal */}
+			<CustomBottomSheetModal handleDismissModalPress={handleModalPress} bottomSheetModalRef={bottomSheetModalRef}>
+				<View className="flex p-3">
+					<Text className="mx-8 text-black font-bold dark:text-white">Filtrar registos</Text>
+					<View className="space-y-4 pt-8">
+						{searchKeys.map((searchKey, index) => (
+							<TouchableOpacity onPress={() => handleSearchKey(searchKey.value)} key={index} className="mx-8">
+								<View className="flex flex-row space-x-3">
+									<View className="">
+										{newSearchKey === searchKey.value ? (
+											<Ionicons name="radio-button-on" size={24} color={isDarkMode ? colors.white : colors.primary} />
+										) : (
+											<Ionicons name="radio-button-off" size={24} color={isDarkMode ? colors.white : colors.black} />
+										)}
+									</View>
+									<View>
+										<Text className="text-black dark:text-white text-[14px]">{searchKey.label}</Text>
+									</View>
+								</View>
+							</TouchableOpacity>
+						))}
+					</View>
+				</View>
+			</CustomBottomSheetModal>
+			<SingleFloatingButton route="/(tabs)/actors/registration/farmer" />
+		</CustomSafeAreaView>
 	)
 }

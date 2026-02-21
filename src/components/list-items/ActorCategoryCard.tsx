@@ -18,9 +18,9 @@ type Props = {
 export default function ActorCategoryCard({ category }: { category: Props }) {
 	const segment: string = match(category.actorCategory)
 		.with(ActorCategory.FARMER, () => `farmers`)
-		.with(ActorCategory.COOP_UNION, () => `groups/coop-unions`)
-		.with(ActorCategory.ASSOCIATION, () => `groups/associations`)
-		.with(ActorCategory.COOPERATIVE, () => `groups/cooperatives`)
+		.with(ActorCategory.COOP_UNION, () => `coop-unions`)
+		.with(ActorCategory.ASSOCIATION, () => `associations`)
+		.with(ActorCategory.COOPERATIVE, () => `cooperatives`)
 		.run()
 
 	return (
