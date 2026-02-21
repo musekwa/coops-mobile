@@ -85,20 +85,9 @@ export default function PendingPasswordReset() {
 				}}
 				className="bg-white dark:bg-black"
 			>
-				<HeroCard />
+				<HeroCard title="MyCoop" description={`Verifique seu email. Um código de redefinição de senha de 6 dígitos foi enviado para ${currentEmail}`} />
 				<View className="py-4">
-					<Text className="text-sm font-bold text-center text-black dark:text-white">Verifique seu email</Text>
-					{currentEmail ? (
-						<FormItemDescription
-							description={`Um código de redefinição de senha de 6 dígitos foi enviado (${currentEmail})`}
-							style={{ textAlign: 'center' }}
-						/>
-					) : (
-						<FormItemDescription
-							description="Por favor, ainda não foi indicado o endereço de email associado à sua conta."
-							style={{ textAlign: 'center' }}
-						/>
-					)}
+					
 				</View>
 				<View className="flex-1 justify-center">
 					<View style={styles.codeContainer}>

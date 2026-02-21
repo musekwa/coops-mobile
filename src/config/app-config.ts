@@ -2,7 +2,7 @@ export const AppConfig = {
 	appUrl: process.env.EXPO_PUBLIC_APP_URL,
 	powersyncUrl: process.env.EXPO_PUBLIC_POWERSYNC_URL,
 	powersyncDbFilename: process.env.EXPO_PUBLIC_POWERSYNC_DB_FILENAME,
-	connectcajuBackendUrl: process.env.EXPO_PUBLIC_CONNECTCAJU_BACKEND_URL,
+	mycoopBackendUrl: process.env.EXPO_PUBLIC_MYCOOP_BACKEND_URL,
 	supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
 	supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
 	imageAvatar: process.env.EXPO_PUBLIC_IMAGE_AVATAR,

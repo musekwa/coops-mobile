@@ -88,13 +88,8 @@ export default function PendingEmailVerification() {
 				}}
 			>
 				<View className="flex-1/3 justify-center items-center space-y-3">
-					<HeroCard />
+					<HeroCard title="MyCoop" description={`Verifique seu email. Um código de verificação de 6 dígitos foi enviado para ${currentEmail}`} />
 
-					<Text className="text-sm font-bold text-center text-black dark:text-white">Verifique seu email</Text>
-					<FormItemDescription
-						description={`Um código de verificação de 6 dígitos foi enviado para ${currentEmail}`}
-						style={{ textAlign: 'center' }}
-					/>
 				</View>
 				<View className="flex-1 justify-center items-center space-y-3">
 					<View style={styles.codeContainer}>

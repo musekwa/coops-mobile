@@ -58,6 +58,27 @@ export default function FarmersScreen() {
 	const { searchKeys, loadSearchKeys } = useSearchOptions(userDetails?.district_id || '')
 
 	// Perform a JOIN with address_details and contact_details tables to get admin_post, primary_phone and secondary_phone for each farmer
+	// Filter by user's district so only farmers from this district are shown
+	const farmersQuery = useMemo(() => {
+		const baseQuery = `SELECT 
+			ad.actor_id as id, 
+			ad.surname, 
+			ad.other_names, 
+			GROUP_CONCAT(ac.subcategory, ';') as multicategory, 
+			addr.admin_post_id, 
+			cd.primary_phone, 
+			cd.secondary_phone 
+		FROM ${TABLES.ACTOR_DETAILS} ad
+		INNER JOIN ${TABLES.ACTOR_CATEGORIES} ac ON ac.actor_id = ad.actor_id AND ac.category = 'FARMER'
+		LEFT JOIN ${TABLES.CONTACT_DETAILS} cd ON cd.owner_id = ad.actor_id AND cd.owner_type = 'FARMER'
+		LEFT JOIN ${TABLES.ADDRESS_DETAILS} addr ON addr.owner_id = ad.actor_id AND addr.owner_type = 'FARMER'`
+		const districtFilter = userDetails?.district_id
+			? ` WHERE addr.district_id = '${userDetails.district_id}'`
+			: ' WHERE 1=0'
+		return `${baseQuery}${districtFilter}
+		GROUP BY ad.actor_id, ad.surname, ad.other_names, addr.admin_post_id, cd.primary_phone, cd.secondary_phone`
+	}, [userDetails?.district_id])
+
 	const {
 		data: farmersWithAdminPostAndContact,
 		isLoading: isFarmersWithAdminPostAndContactLoading,
@@ -71,21 +92,7 @@ export default function FarmersScreen() {
 		admin_post_id: string
 		primary_phone: string
 		secondary_phone: string
-	}>(
-		`SELECT 
-			ad.actor_id as id, 
-			ad.surname, 
-			ad.other_names, 
-			GROUP_CONCAT(ac.subcategory, ';') as multicategory, 
-			addr.admin_post_id, 
-			cd.primary_phone, 
-			cd.secondary_phone 
-		FROM ${TABLES.ACTOR_DETAILS} ad
-		INNER JOIN ${TABLES.ACTOR_CATEGORIES} ac ON ac.actor_id = ad.actor_id AND ac.category = 'FARMER'
-		LEFT JOIN ${TABLES.CONTACT_DETAILS} cd ON cd.owner_id = ad.actor_id AND cd.owner_type = 'FARMER'
-		LEFT JOIN ${TABLES.ADDRESS_DETAILS} addr ON addr.owner_id = ad.actor_id AND addr.owner_type = 'FARMER'
-		GROUP BY ad.actor_id, ad.surname, ad.other_names, addr.admin_post_id, cd.primary_phone, cd.secondary_phone`,
-	)
+	}>(farmersQuery)
 
 	const [activeTab, setActiveTab] = useState('')
 

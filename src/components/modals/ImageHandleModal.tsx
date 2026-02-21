@@ -55,10 +55,10 @@ export default function ImageHandleModal({
 
 	const navigateToCamera = () => {
 		if (!hasPermission) {
-			router.push('/(aux)/device-features/device-permissions')
+			router.push('/(aux)/native-features/device-permissions')
 			return
 		}
-		router.push('/(aux)/device-features/camera')
+		router.push('/(aux)/native-features/camera')
 		setShowImageHandleModal(false)
 	}
 

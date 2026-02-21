@@ -53,11 +53,11 @@ export default function AddLicensePhoto({
 		// reset the current resourceName to focus on the ActionType only
 		resetCurrentResource()
 		if (!hasPermission) {
-			router.push('/(aux)/device-features/device-permissions')
+			router.push('/(aux)/native-features/device-permissions')
 			return
 		}
 		resetBase64()
-		router.push('/(aux)/device-features/camera')
+		router.push('/(aux)/native-features/camera')
 	}
 
 	return (

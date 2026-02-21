@@ -18,6 +18,7 @@ import splash3 from '../../assets/images/splash-3.png'
 import splash4 from '../../assets/images/splash-4.png'
 import splash123 from '../../assets/images/splash123.png'
 import warehouseImage from '../../assets/images/warehouse.png'
+import ampcmLogo from '../../assets/images/ampcm-logo.png'
 
 import mozLogoImage from '../../assets/images/moz-logo.png'
 
@@ -64,6 +65,7 @@ export const splash2Uri = Image.resolveAssetSource(splash2).uri
 export const splash3Uri = Image.resolveAssetSource(splash3).uri
 export const splash4Uri = Image.resolveAssetSource(splash4).uri
 export const splash123Uri = Image.resolveAssetSource(splash123).uri
+export const ampcmLogoUri = Image.resolveAssetSource(ampcmLogo).uri
 
 // Actor Categories
 export const farmerCategoryImageUri = Image.resolveAssetSource(farmerCategoryImage).uri

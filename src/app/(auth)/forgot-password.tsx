@@ -83,12 +83,7 @@ export default function ForgotPassword() {
 				}}
 			>
 				<View className="flex-1/3 justify-center space-y-3">
-					<HeroCard />
-					<Text className="text-sm font-bold text-center text-black dark:text-white">Esqueceu a senha?</Text>
-					<FormItemDescription
-						description="Digite seu endereço de email para redefinir a senha."
-						style={{ textAlign: 'center' }}
-					/>
+					<HeroCard title="MyCoop" description="Esqueceu a senha? Digite seu endereço de email para redefinir a senha." />
 				</View>
 				<View className="flex-1 justify-center">
 					<Controller

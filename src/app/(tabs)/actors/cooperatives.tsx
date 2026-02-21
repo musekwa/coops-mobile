@@ -35,7 +35,12 @@ export default function CooperativesScreen() {
 		showOptionsButton: true,
 	})
 
-	const { items } = useOrganizationList(CONFIG.organizationType, search, adminPostFilter || undefined)
+	const { items } = useOrganizationList(
+		CONFIG.organizationType,
+		search,
+		adminPostFilter || undefined,
+		userDetails?.district_id ?? undefined,
+	)
 
 	const handleFilterSelect = (value: string) => {
 		handleModalPress()

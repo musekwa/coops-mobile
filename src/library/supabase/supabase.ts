@@ -25,7 +25,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 	},
 	global: {
 		headers: {
-			'X-Client-Info': 'connectcaju-mobile',
+			'X-Client-Info': 'mycoop-mobile',
 		},
 	},
 })

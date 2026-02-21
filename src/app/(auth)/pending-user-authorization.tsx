@@ -127,14 +127,14 @@ export default function PendingUserAuthorization() {
 		const message = `
 					Prezados senhores,
 					
-					Criei uma conta no aplicativo ConnectCaju, mas ainda não foi autorizada.
+					Criei uma conta no aplicativo MyCoop, mas ainda não foi autorizada.
 
 					Detalhes da conta:
 					Nome: ${userDetails?.full_name}
 					Email: ${userDetails?.email}
 					Telefone: ${userDetails?.phone}
 					
-					Preciso de ajuda com a autorização da minha conta ConnectCaju. Se possível, me avise quando a conta for autorizada.
+					Preciso de ajuda com a autorização da minha conta MyCoop. Se possível, me avise quando a conta for autorizada.
 
 					Obrigado!`
 		const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`
@@ -169,19 +169,19 @@ export default function PendingUserAuthorization() {
 	}
 
 	const handleEmail = async () => {
-		const email = 'connectcaju@iam.gov.mz'
-		const subject = 'Pedido de Autorização - Conta ConnectCaju'
+		const email = 'mycoop@ampcm.org'
+		const subject = 'Pedido de Autorização - Conta MyCoop'
 		const body = `
 					Prezados senhores,
 
-					Criei uma conta no aplicativo ConnectCaju, mas ainda não foi autorizada.
+					Criei uma conta no aplicativo MyCoop, mas ainda não foi autorizada.
 
 					Detalhes da conta:
 					Nome: ${userDetails?.full_name}
 					Email: ${userDetails?.email}
 					Telefone: ${userDetails?.phone}
 					
-					Preciso de ajuda com a autorização da minha conta ConnectCaju. Se possível, me avise quando a conta for autorizada.
+					Preciso de ajuda com a autorização da minha conta MyCoop. Se possível, me avise quando a conta for autorizada.
 
 					Obrigado!`
 
@@ -222,14 +222,7 @@ export default function PendingUserAuthorization() {
 				<ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
 					{/* Header Section */}
 					<View className="flex-1/3 justify-center items-center space-y-3">
-						<HeroCard />
-
-						<Text className="text-sm font-bold text-center text-black dark:text-white">Aguarde Autorização</Text>
-
-						<FormItemDescription
-							description="A autorização da sua conta está a ser processada. Você receberá um email assim que for aprovada."
-							style={{ textAlign: 'center' }}
-						/>
+						<HeroCard title="MyCoop" description="Aguarde Autorização. A autorização da sua conta está a ser processada. Você receberá um email assim que for aprovada." />
 					</View>
 
 					<View className="flex-1 justify-center space-y-3">

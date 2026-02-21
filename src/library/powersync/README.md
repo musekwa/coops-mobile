@@ -121,7 +121,7 @@ Make sure these environment variables are set:
 
 ```env
 EXPO_PUBLIC_POWERSYNC_URL=your_powersync_url
-EXPO_PUBLIC_CONNECTCAJU_BACKEND_URL=your_backend_url
+EXPO_PUBLIC_MYCOOP_BACKEND_URL=your_backend_url
 EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
 ```

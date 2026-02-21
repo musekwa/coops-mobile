@@ -30,7 +30,7 @@
           "data": [
             {
               "scheme": "https",
-              "host": "*.connectcaju.com",
+              "host": "*.mycoop.com",
               "pathPrefix": "/mobile"
             }
           ],
@@ -41,7 +41,6 @@
         }
       ],
       "softwareKeyboardLayoutMode": "pan",
-      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -87,9 +86,6 @@
         {
           "android": {
             "minSdkVersion": 24,
-            "compileSdkVersion": 35,
-            "targetSdkVersion": 35,
-            "buildToolsVersion": "35.0.0",
             "usesCleartextTraffic": true
           }
         }

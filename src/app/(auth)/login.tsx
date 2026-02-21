@@ -109,7 +109,7 @@ export default function Login() {
 				}}
 			>
 				<View className="flex-1 justify-center space-y-3">
-					<HeroCard />
+					<HeroCard title="MyCoop" description="Faça login para continuar" />
 				</View>
 				<View className="flex-1 justify-center">
 					<LogInForm performLogin={performLogin} />

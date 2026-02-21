@@ -92,15 +92,10 @@ export default function PasswordReset() {
 				}}
 				className="bg-white dark:bg-black"
 			>
-				<HeroCard />
+				<HeroCard title="MyCoop" description="Redefina sua senha. Digite sua nova senha e confirme-a para redefinir sua senha." />
 				<View className="py-4">
-					<Text className="text-sm font-bold text-center text-black dark:text-white">Redefina sua senha</Text>
-					<FormItemDescription
-						description="Digite sua nova senha e confirme-a para redefinir sua senha."
-						style={{ textAlign: 'center' }}
-					/>
-				</View>
 
+				</View>
 				<View className="flex-1 justify-center space-y-3">
 					<View className="relative">
 						<Controller

@@ -23,7 +23,7 @@ export default function BannedUser() {
 
 	const handleWhatsApp = async () => {
 		const phoneNumber = '+258840445375'
-		const message = 'Olá! Preciso de ajuda com minha conta ConnectCaju que foi bloqueada/banida.'
+		const message = 'Olá! Preciso de ajuda com minha conta MyCoop que foi bloqueada/banida.'
 		const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`
 		
 		try {
@@ -50,9 +50,9 @@ export default function BannedUser() {
 	}
 
 	const handleEmail = async () => {
-		const email = 'connectcaju@iam.gov.mz'
-		const subject = 'Suporte - Conta Bloqueada/Banida ConnectCaju'
-		const body = 'Olá! Preciso de ajuda com minha conta ConnectCaju que foi bloqueada/banida.'
+		const email = 'mycoop@ampcm.org'
+		const subject = 'Suporte - Conta Bloqueada/Banida MyCoop'
+		const body = 'Olá! Preciso de ajuda com minha conta MyCoop que foi bloqueada/banida.'
 		
 		try {
 			await Linking.openURL(`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`)

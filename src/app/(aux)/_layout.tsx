@@ -4,15 +4,13 @@ import useBackHandler from '../../hooks/useBackHandler'
 
 export default function AuxLayout() {
 	const router = useRouter()
-	
-	useBackHandler(
-		{
-			title: 'Sair',
-			message: 'Tem a certeza de que pretende sair?',
-			okText: 'Sim',
-			cancelText: 'Cancelar',
-			navigationAction: ()=>router.navigate('/(tabs)/actors/farmers')
-		}
-	)
+
+	useBackHandler({
+		title: 'Sair',
+		message: 'Tem a certeza de que pretende sair?',
+		okText: 'Sim',
+		cancelText: 'Cancelar',
+		navigationAction: () => router.navigate('/(tabs)/actors/farmers'),
+	})
 	return <Slot />
 }

@@ -2,8 +2,8 @@
 
 ## Git Clone
 ```
-git clone https://github.com/iam-2023/connectcaju 
-cd connectcaju
+git clone https://github.com/iam-2023/coops-mobile
+cd coops-mobile
 ```
 
 ## Install Dependencies and Prebuild

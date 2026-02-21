@@ -15,7 +15,7 @@ import { ActorDetailRecord, TABLES } from 'src/library/powersync/schemas/AppSche
 import { updateOne } from 'src/library/powersync/sql-statements'
 import { useShipmentLicenseStore } from 'src/store/shipment/shipment_license'
 
-const renderImage = ({ source, style }: { source: any; style: any }) => {
+function ImageWithLoader({ source, style }: { source: { uri?: string }; style: any }) {
 	const [isLoading, setIsLoading] = useState(true)
 
 	return (
@@ -96,14 +96,14 @@ export default function CustomImageViewer({
 	}
 
 	return (
-		<Modal visible={visible} transparent={true} style={styles.fullScreen} onRequestClose={() => setVisible(false)}>
+		<Modal isVisible={visible} style={styles.fullScreen} onBackButtonPress={() => setVisible(false)}>
 			<ImageViewer
 				imageUrls={images.map((image) => ({ url: image.uri }))}
 				index={0}
 				enableImageZoom={true}
 				enablePreload={true}
 				useNativeDriver={true}
-				renderImage={renderImage}
+				renderImage={(props) => <ImageWithLoader source={props.source} style={props.style} />}
 				enableSwipeDown={true}
 				saveToLocalByLongPress={false}
 				loadingRender={() => <Spinner />}

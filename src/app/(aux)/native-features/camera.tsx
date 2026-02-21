@@ -1,10 +1,13 @@
 import * as React from 'react'
-import { View, Text, StyleSheet, Platform, StatusBar, TouchableHighlight } from 'react-native'
-import { Redirect, Stack, useRouter } from 'expo-router'
+import { View, Text, StyleSheet, Platform, StatusBar, TouchableHighlight, TouchableOpacity } from 'react-native'
+import { Href, Redirect, Stack, useNavigation, useRouter } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 import { Camera, useCameraDevice, useCameraPermission } from 'react-native-vision-camera'
 // import { BlurView } from 'expo-blur'
 import { FontAwesome5 } from '@expo/vector-icons'
 import * as ImageManipulator from 'expo-image-manipulator'
+
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { colors } from 'src/constants'
 import { useActionStore } from 'src/store/actions/actions'
@@ -14,9 +17,11 @@ import ObscuraButton from 'src/components/buttons/ObscuraButton'
 import ZoomControls from 'src/components/camera/ZoomControls'
 import ErrorAlert from 'src/components/dialogs/ErrorAlert'
 import CustomProgressDialg from 'src/components/dialogs/CustomProgressDialg'
+import CustomSafeAreaView from 'src/components/layouts/safe-area-view'
+import { ActionType, ResourceName } from 'src/types'
 
 export default function Page() {
-	const { setBase64, base64, setReloading, reloading, setToast } = useActionStore()
+	const { setBase64, base64, setReloading, reloading, setToast, addActionType, currentResource } = useActionStore()
 	const { hasPermission } = useCameraPermission()
 	// const microphonePermission = Camera.getMicrophonePermissionStatus()
 	const directToPermission = !hasPermission
@@ -26,14 +31,26 @@ export default function Page() {
 	const [exposure, setExposure] = React.useState(0)
 	const [flash, setFlash] = React.useState<'off' | 'on'>('off')
 	const [torch, setTorch] = React.useState<'off' | 'on'>('off')
-	const camera = React.useRef<typeof Camera>(null)
+	const camera = React.useRef<Camera>(null)
 	const [showZoomControls, setShowZoomControls] = React.useState(false)
 	const router = useRouter()
+	const insets = useSafeAreaInsets()
 	const [hasError, setHasError] = React.useState(false)
 	const [errorMessage, setErrorMessage] = React.useState('')
+	// const navigation = useNavigation()
 
 	const toggleFlash = () => {
 		setFlash((f) => (f === 'off' ? 'on' : 'off'))
+	}
+
+	const handleBack = () => {
+		if (addActionType === ActionType.ADD_TRANSIT_LICENSE_IMAGE) {
+			router.navigate('/(aux)/trades/transit/registration')
+		} else if (currentResource.id.length > 10 && currentResource.name !== ResourceName.UNKNOWN) {
+			router.navigate(`/(aux)/actors/${currentResource.name.toLowerCase()}` as Href)
+		} else {
+			router.back()
+		}
 	}
 
 	const uploadPhoto = async () => {
@@ -41,9 +58,7 @@ export default function Page() {
 			const base64 = await pickImageFromGallery()
 			if (base64) {
 				setBase64(base64)
-				router.push({
-					pathname: '/(aux)/device-features/media-preview',
-				})
+				router.navigate('/(aux)/native-features/media-preview' as Href)
 			}
 		} catch (error) {
 			setHasError(true)
@@ -66,9 +81,7 @@ export default function Page() {
 
 			if (result.base64) {
 				setBase64(`data:image/jpeg;base64,${result.base64}`)
-				router.push({
-					pathname: '/(aux)/device-features/media-preview',
-				})
+				router.navigate('/(aux)/native-features/media-preview' as Href)
 			}
 		} catch (error) {
 			console.error(error)
@@ -76,21 +89,23 @@ export default function Page() {
 	}
 
 	if (directToPermission) {
-		return <Redirect href="/(aux)/device-features/device-permissions" />
+		return <Redirect href="/(aux)/native-features/device-permissions" />
 	}
 
 	if (!device) return <></>
 
 	return (
 		<>
-			<Stack.Screen
-				options={{
-					headerShown: false,
-				}}
-			/>
 			<View style={{ flex: 1 }}>
 				<View className="flex-1 bg-white dark:bg-black">
 				<View style={{ flex: 3, borderRadius: 0, overflow: 'hidden' }}>
+					<TouchableOpacity
+						onPress={handleBack}
+						hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+						style={[styles.backButton, { top: insets.top + 8 }]}
+					>
+						<Ionicons name="arrow-back" size={28} color="#fff" />
+					</TouchableOpacity>
 					<Camera
 						ref={camera}
 						style={{ flex: 1 }}
@@ -188,5 +203,16 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+	},
+	backButton: {
+		position: 'absolute',
+		left: 16,
+		zIndex: 10,
+		width: 44,
+		height: 44,
+		borderRadius: 22,
+		backgroundColor: 'rgba(0,0,0,0.4)',
+		alignItems: 'center',
+		justifyContent: 'center',
 	},
 })
