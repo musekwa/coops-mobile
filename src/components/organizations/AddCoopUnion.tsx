@@ -297,7 +297,7 @@ export default function AddCoopUnionForm({
 	setPreviewData,
 	setErrorMessage,
 	setHasError,
-}: AddCoopUnionFormProps): JSX.Element {
+}: AddCoopUnionFormProps) {
 	const { userDetails } = useUserDetails()
 	const { resetFormData, setFormData, formData } = useCoopUnionStore()
 	const { validateByAddressLevel } = useAddressStore()
@@ -564,7 +564,7 @@ export default function AddCoopUnionForm({
 				{screens[currentScreen].component}
 			</KeyboardAwareScrollView>
 
-			<View className="absolute bottom-0 left-0 right-0">
+			<View className="absolute bottom-12 left-6 right-6">
 				<NextAndPreviousButtons
 					// currentStep={currentScreen}
 					handlePreviousStep={handlePrevious}

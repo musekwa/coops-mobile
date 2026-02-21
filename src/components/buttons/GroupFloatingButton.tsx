@@ -33,7 +33,7 @@ export function GroupFloatingButton({ categories }: { categories: Props }) {
 				style={[
 					styles.fab,
 					{
-						bottom: isOpen ? 50 : 60,
+						bottom: isOpen ? 30 : 60,
 					},
 				]}
 				open={isOpen}
@@ -72,14 +72,14 @@ export function GroupFloatingButton({ categories }: { categories: Props }) {
 					label: category.title,
 					labelStyle: { color: colorScheme === 'dark' ? colors.white : colors.black, fontSize: 20 },
 					onPress: () => {
-						if (category.actorCategory === ActorCategory.GROUP) {
-							router.navigate('/actors/registration/org-registration')
-						} else if (category.actorCategory === ActorCategory.FARMER) {
-							router.navigate('/actors/registration/farmer-registration')
-						} else if (category.actorCategory === ActorCategory.TRADER) {
-							router.navigate('/actors/registration/trader-registration')
-						} else if (category.actorCategory === ActorCategory.SERVICE_PROVIDER) {
-							router.navigate('/actors/registration/service-provider-registration' as Href)
+						if (category.actorCategory === ActorCategory.FARMER) {
+							router.navigate('/actors/registration/farmer')
+						} else if (category.actorCategory === ActorCategory.COOPERATIVE) {
+							router.navigate('/actors/registration/cooperative')
+						} else if (category.actorCategory === ActorCategory.ASSOCIATION) {
+							router.navigate('/actors/registration/association')
+						} else if (category.actorCategory === ActorCategory.COOP_UNION) {
+							router.navigate('/actors/registration/coop-union')
 						}
 
 						setCategory({

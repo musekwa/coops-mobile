@@ -1276,11 +1276,12 @@ export default function AddIndividualFarmer() {
 					flexGrow: 1,
 					paddingBottom: 80,
 					paddingTop: 20,
+					paddingHorizontal: 16,
 				}}
 			>
 				{screens[currentScreen]}
 			</KeyboardAwareScrollView>
-			<View className="absolute bottom-0 left-0 right-0">
+			<View className="absolute bottom-12 left-6 right-6">
 				<NextAndPreviousButtons
 					handlePreviousStep={handlePrevious}
 					handleNextStep={currentScreen === screens.length - 1 ? handleSubmit(onSubmit) : handleNext}

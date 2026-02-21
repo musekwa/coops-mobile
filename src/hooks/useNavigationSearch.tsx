@@ -2,7 +2,7 @@ import { useNavigation } from 'expo-router'
 import { useColorScheme } from 'nativewind'
 import { useLayoutEffect, useState } from 'react'
 import { SearchBarProps } from 'react-native-screens'
-import { NativeStackNavigationOptions } from 'react-native-screens/lib/typescript/native-stack/types'
+import type { NativeStackNavigationOptions } from '@react-navigation/native-stack'
 import { colors } from 'src/constants'
 
 

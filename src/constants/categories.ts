@@ -60,18 +60,25 @@ export const categoryOptions = [
 		imageUri: farmerCategoryImageUri,
 	},
 	{
-		actorCategory: ActorCategory.TRADER,
-		title: 'Comerciante',
+		actorCategory: ActorCategory.COOPERATIVE,
+		title: 'Cooperativa',
 		icon: 'hand-holding-dollar',
 		description: '',
 		imageUri: traderCategoryImageUri,
 	},
 	{
-		actorCategory: ActorCategory.GROUP,
-		title: 'Grupos',
+		actorCategory: ActorCategory.ASSOCIATION,
+		title: 'Associação',
 		icon: 'people-group',
 		description: '',
-		imageUri: actorOrganizationsImageUri,
+		imageUri: associationCategoryImageUri,
+	},
+	{
+		actorCategory: ActorCategory.COOP_UNION,
+		title: 'União de Cooperativas',
+		icon: 'people-group',
+		description: '',
+		imageUri: unionCategoryImageUri,
 	},
 ]
 
@@ -106,13 +113,13 @@ export const categoriesCardDetails: CategoryCardType[] = [
 	// },
 	{
 		actorCategory: ActorCategory.COOPERATIVE,
-		description: 'Cooperativas agrícolas e de produtores.',
+		description: 'Cooperativas de produtores.',
 		title: 'Cooperativas',
 		bannerImage: cooperativeCategoryImageUri,
 	},
 	{
 		actorCategory: ActorCategory.ASSOCIATION,
-		description: 'Associações de produtores e comunidades.',
+		description: 'Associações de produtores.',
 		title: 'Associações',
 		bannerImage: associationCategoryImageUri,
 	},
