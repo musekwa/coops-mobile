@@ -1,148 +1,62 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import BackButton from 'src/components/buttons/BackButton'
-import { Text, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import SingleFloatingButton from 'src/components/buttons/SingleFloatingButton'
 import OrganizationsList from 'src/components/organizations/OrganizationsList'
-import { useQueryMany, useSearchOptions, useUserDetails } from 'src/hooks/queries'
-import { useHeaderOptions, useNavigationSearch } from 'src/hooks/useNavigationSearch'
 import CustomSafeAreaView from 'src/components/layouts/safe-area-view'
-import { TABLES } from 'src/library/powersync/schemas/AppSchema'
+import AdminPostFilterModal from 'src/components/modals/AdminPostFilterModal'
+import { useNavigationSearch } from 'src/hooks/useNavigationSearch'
+import { useActorsHeader } from 'src/hooks/useActorsHeader'
+import { useLocationName } from 'src/hooks/useLocationName'
+import { useOrganizationList } from 'src/hooks/useOrganizationList'
+import { useSearchOptions, useUserDetails } from 'src/hooks/queries'
 import { OrganizationTypes } from 'src/types'
 import { useActionStore } from 'src/store/actions/actions'
-import { useNavigation } from 'expo-router'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { Ionicons } from '@expo/vector-icons'
-import { colors } from 'src/constants'
-import { getDistrictById } from 'src/library/sqlite/selects'
+
+const CONFIG = {
+	organizationType: OrganizationTypes.ASSOCIATION,
+	searchPlaceholder: 'Procurar Associações',
+	subtitle: 'Associações',
+	registrationRoute: '/(tabs)/actors/registration/association' as const,
+}
 
 export default function AssociationsScreen() {
-	const { userDetails, isLoading: isUserLoading } = useUserDetails()
+	const { userDetails } = useUserDetails()
 	const { resetCurrentResource } = useActionStore()
-	const [locationName, setLocationName] = useState<string>('')
-	const navigation = useNavigation()
-	const [isSearchOptionsVisible, setIsSearchOptionsVisible] = useState(false)
-	const [newSearchKey, setNewSearchKey] = useState<string>('')
-	const [isLoading, setIsLoading] = useState(false)
-	const [activeTab, setActiveTab] = useState('')
+	const locationName = useLocationName()
+	const { search } = useNavigationSearch({
+		searchBarOptions: { placeholder: CONFIG.searchPlaceholder },
+	})
+	const [adminPostFilter, setAdminPostFilter] = useState<string>('')
 	const { searchKeys, loadSearchKeys } = useSearchOptions(userDetails?.district_id || '')
-	const bottomSheetModalRef = useRef<BottomSheetModal>(null)
-	const { search } = useNavigationSearch({ searchBarOptions: { placeholder: 'Procurar Associações' } })
-	const organizationType = OrganizationTypes.ASSOCIATION
 
-
-	// Perform a JOIN with address_details table to get the admin_post for each association
-	const {
-		data: groupsWithAddressAndDocument,
-		isLoading: isGroupsWithAddressAndDocumentLoading,
-		error: groupsWithAddressAndDocumentError,
-		isError: isGroupsWithAddressAndDocumentError,
-	} = useQueryMany<{
-		id: string
-		group_name: string
-		organization_type: string
-		admin_post: string
-	}>(
-		`SELECT 
-			a.id, 
-			ad.other_names as group_name, 
-			ac.subcategory as organization_type, 
-			ap.name as admin_post 
-		FROM ${TABLES.ACTORS} a
-		INNER JOIN ${TABLES.ACTOR_DETAILS} ad ON ad.actor_id = a.id
-		LEFT JOIN ${TABLES.ACTOR_CATEGORIES} ac ON ac.actor_id = a.id AND ac.category = 'GROUP'
-		LEFT JOIN ${TABLES.ADDRESS_DETAILS} addr ON addr.owner_id = a.id AND addr.owner_type = 'GROUP'
-		LEFT JOIN ${TABLES.ADMIN_POSTS} ap ON addr.admin_post_id = ap.id
-		WHERE a.category = 'GROUP' AND ac.subcategory = '${organizationType}'`,
-	)
-
-	// Search for coops that match the search query and in case of no search query, return all coops
-	const associationsFiltered = useMemo(() => {
-		if (!search) return groupsWithAddressAndDocument.reverse()
-		return groupsWithAddressAndDocument
-			.filter((association) => association.group_name.toLowerCase().includes(search.toLowerCase()))
-			.reverse()
-	}, [groupsWithAddressAndDocument, search])
-
-	const handleModalPress = useCallback(() => {
-		if (!isSearchOptionsVisible) {
-			bottomSheetModalRef.current?.present()
-			setIsSearchOptionsVisible(true)
-		} else {
-			bottomSheetModalRef.current?.dismiss()
-			setIsSearchOptionsVisible(false)
-		}
-	}, [isSearchOptionsVisible])
-
-	const handleSearchKeys = () => {
-		// get all adminPosts
-		loadSearchKeys()
-	}
-
-// Update header options
-useEffect(() => {
-	navigation.setOptions({
-		headerTitle: () => (
-			<View className="items-center">
-				<Text className="text-black dark:text-white text-[14px] font-bold">{locationName}</Text>
-				<Text className="text-gray-600 dark:text-gray-400 font-mono text-[12px]">Cooperativas</Text>
-			</View>
-		),
-		headerLeft: () => <BackButton route="/(tabs)/actors" />,
-		headerRight: () => (
-			<View className="mx-2">
-				<Ionicons
-					onPress={handleModalPress}
-					name={isSearchOptionsVisible ? 'options' : 'options-outline'}
-					size={24}
-					color={isSearchOptionsVisible ? colors.primary : colors.gray600}
-				/>
-			</View>
-		),
+	const { bottomSheetModalRef, handleModalPress } = useActorsHeader({
+		locationName,
+		subtitle: CONFIG.subtitle,
+		onResetResource: resetCurrentResource,
+		showOptionsButton: true,
 	})
 
-	// reset current resource
-	resetCurrentResource()
-}, [isSearchOptionsVisible, locationName])
+	const { items } = useOrganizationList(CONFIG.organizationType, search, adminPostFilter || undefined)
 
-
-useEffect(() => {
-	handleSearchKeys()
-	if (isLoading) {
-		setTimeout(() => {
-			setIsLoading(false)
-		}, 500)
-	}
-	if (activeTab === '') {
-		setActiveTab('ALL')
-		setIsLoading(true)
-	}
-}, [activeTab, isLoading])
-	
-
-// Fetch location name when userDetails becomes available
-useEffect(() => {
-	const fetchLocationName = async () => {
-		if (userDetails?.district_id) {
-			try {
-				const district = await getDistrictById(userDetails.district_id) as string
-				setLocationName(district || '')
-			} catch (error) {
-				console.error('Error fetching district name:', error)
-				setLocationName('')
-			}
-		} else if (!isUserLoading) {
-			setLocationName('')
-		}
+	const handleFilterSelect = (value: string) => {
+		handleModalPress()
+		setAdminPostFilter(value === 'All' ? '' : value)
 	}
 
-	fetchLocationName()
-}, [userDetails?.district_id])
-
+	useEffect(() => {
+		loadSearchKeys()
+	}, [loadSearchKeys])
 
 	return (
 		<CustomSafeAreaView edges={['bottom']} style={{ paddingTop: 0 }}>
-			<OrganizationsList items={associationsFiltered} organizationType={organizationType} />
-			<SingleFloatingButton route="/(tabs)/actors/registration/association" />
+			<OrganizationsList items={items} organizationType={CONFIG.organizationType} />
+			<AdminPostFilterModal
+				bottomSheetModalRef={bottomSheetModalRef}
+				handleDismissModalPress={handleModalPress}
+				searchKeys={searchKeys}
+				selectedValue={adminPostFilter || 'All'}
+				onSelect={handleFilterSelect}
+			/>
+			<SingleFloatingButton route={CONFIG.registrationRoute} />
 		</CustomSafeAreaView>
 	)
 }

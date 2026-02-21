@@ -1,35 +1,25 @@
 // React and React Native imports
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { FlatList, Text, TouchableOpacity, View } from 'react-native'
-import { useColorScheme } from 'nativewind'
-
-// Third-party libraries
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { Ionicons } from '@expo/vector-icons'
-import { useNavigation } from 'expo-router'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { FlatList, View } from 'react-native'
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated'
 
 // Components
 import ActorListItem from 'src/components/actors/ActorListItem'
-import BackButton from 'src/components/buttons/BackButton'
-import CustomBottomSheetModal from 'src/components/modals/CustomBottomSheetModal'
+import AdminPostFilterModal from 'src/components/modals/AdminPostFilterModal'
 import CustomShimmerPlaceholder from 'src/components/placeholder/CustomShimmerPlaceholder'
 import SingleFloatingButton from 'src/components/buttons/SingleFloatingButton'
 import SkeletonLoader from 'src/components/skeleton/SkeletonLoader'
 
 // Hooks
 import { useNavigationSearch } from 'src/hooks/useNavigationSearch'
+import { useActorsHeader } from 'src/hooks/useActorsHeader'
+import { useLocationName } from 'src/hooks/useLocationName'
 
 import { MultiCategory, ResourceName } from 'src/types'
-
-// Constants
-import { colors } from 'src/constants'
-
 import { useQueryMany, useSearchOptions, useUserDetails } from 'src/hooks/queries'
 import { TABLES } from 'src/library/powersync/schemas/AppSchema'
 import { useActionStore } from 'src/store/actions/actions'
 import EmptyPlaceholder from 'src/components/not-found/EmptyPlaceholder'
-import { getDistrictById } from 'src/library/sqlite/selects'
 import CustomSafeAreaView from 'src/components/layouts/safe-area-view'
 
 type Item = {
@@ -55,19 +45,14 @@ const items: Item[] = [
 ]
 
 export default function FarmersScreen() {
-	const { userDetails, isLoading: isUserLoading } = useUserDetails()
+	const { userDetails } = useUserDetails()
 	const { resetCurrentResource } = useActionStore()
-	const [locationName, setLocationName] = useState<string>('')
+	const locationName = useLocationName()
 
 	const { search, setSearch } = useNavigationSearch({
-		searchBarOptions: {
-			placeholder: 'Procurar Produtores',
-		},
+		searchBarOptions: { placeholder: 'Procurar Produtores' },
 	})
-	const [isSearchOptionsVisible, setIsSearchOptionsVisible] = useState(false)
-	const navigation = useNavigation()
 	const [newSearchKey, setNewSearchKey] = useState<string>('')
-	const isDarkMode = useColorScheme().colorScheme === 'dark'
 	const [isLoading, setIsLoading] = useState(false)
 
 	const { searchKeys, loadSearchKeys } = useSearchOptions(userDetails?.district_id || '')
@@ -144,55 +129,17 @@ export default function FarmersScreen() {
 			.reverse()
 	}, [search, farmersWithAdminPostAndContact, activeTab, newSearchKey])
 
-	// Update header options
-	useEffect(() => {
-		navigation.setOptions({
-			headerTitle: () => (
-				<View className="items-center">
-					<Text className="text-black dark:text-white text-[14px] font-bold">{locationName}</Text>
-					<Text className="text-gray-600 dark:text-gray-400 font-mono text-[12px]">Produtores</Text>
-				</View>
-			),
-			headerLeft: () => <BackButton route="/(tabs)/actors" />,
-			headerRight: () => (
-				<View className="mx-2">
-					<Ionicons
-						onPress={handleModalPress}
-						name={isSearchOptionsVisible ? 'options' : 'options-outline'}
-						size={24}
-						color={isSearchOptionsVisible ? colors.primary : colors.gray600}
-					/>
-				</View>
-			),
-		})
+	const { bottomSheetModalRef, handleModalPress } = useActorsHeader({
+		locationName,
+		subtitle: 'Produtores',
+		onResetResource: resetCurrentResource,
+		showOptionsButton: true,
+	})
 
-		// reset current resource
-		resetCurrentResource()
-	}, [isSearchOptionsVisible, locationName])
+	const handleSearchKeys = () => loadSearchKeys()
 
-	const handleSearchKeys = () => {
-		// get all adminPosts
-		loadSearchKeys()
-	}
-
-	const bottomSheetModalRef = useRef<BottomSheetModal>(null)
-
-	const handleModalPress = useCallback(() => {
-		if (!isSearchOptionsVisible) {
-			bottomSheetModalRef.current?.present()
-			setIsSearchOptionsVisible(true)
-		} else {
-			bottomSheetModalRef.current?.dismiss()
-			setIsSearchOptionsVisible(false)
-		}
-	}, [])
-
-	const handleModalDismissPress = useCallback(() => {
-		bottomSheetModalRef.current?.dismiss()
-	}, [])
-
-	const handleSearchKey = (key: string) => {
-		handleModalDismissPress()
+	const handleFilterSelect = (key: string) => {
+		handleModalPress()
 		setIsLoading(true)
 		if (key === 'All') {
 			setNewSearchKey('')
@@ -215,25 +162,6 @@ export default function FarmersScreen() {
 		}
 	}, [activeTab, isLoading])
 
-
-		// Fetch location name when userDetails becomes available
-		useEffect(() => {
-			const fetchLocationName = async () => {
-				if (userDetails?.district_id) {
-					try {
-						const district = await getDistrictById(userDetails.district_id) as string
-						setLocationName(district || '')
-					} catch (error) {
-						console.error('Error fetching district name:', error)
-						setLocationName('')
-					}
-				} else if (!isUserLoading) {
-					setLocationName('')
-				}
-			}
-	
-			fetchLocationName()
-		}, [userDetails?.district_id])
 
 	// Render each farmer with a photo, name, surname, phone number, and cashew stock
 	const renderItem = useCallback(
@@ -318,30 +246,14 @@ export default function FarmersScreen() {
 				)}
 			</View>
 
-			{/* Bottom Sheet Modal */}
-			<CustomBottomSheetModal handleDismissModalPress={handleModalPress} bottomSheetModalRef={bottomSheetModalRef}>
-				<View className="flex p-3">
-					<Text className="mx-8 text-black font-bold dark:text-white">Filtrar registos</Text>
-					<View className="space-y-4 pt-8">
-						{searchKeys.map((searchKey, index) => (
-							<TouchableOpacity onPress={() => handleSearchKey(searchKey.value)} key={index} className="mx-8">
-								<View className="flex flex-row space-x-3">
-									<View className="">
-										{newSearchKey === searchKey.value ? (
-											<Ionicons name="radio-button-on" size={24} color={isDarkMode ? colors.white : colors.primary} />
-										) : (
-											<Ionicons name="radio-button-off" size={24} color={isDarkMode ? colors.white : colors.black} />
-										)}
-									</View>
-									<View>
-										<Text className="text-black dark:text-white text-[14px]">{searchKey.label}</Text>
-									</View>
-								</View>
-							</TouchableOpacity>
-						))}
-					</View>
-				</View>
-			</CustomBottomSheetModal>
+			<AdminPostFilterModal
+				bottomSheetModalRef={bottomSheetModalRef}
+				handleDismissModalPress={handleModalPress}
+				searchKeys={searchKeys}
+				selectedValue={newSearchKey || 'All'}
+				onSelect={handleFilterSelect}
+				title="Filtrar registos"
+			/>
 			<SingleFloatingButton route="/(tabs)/actors/registration/farmer" />
 		</CustomSafeAreaView>
 	)
