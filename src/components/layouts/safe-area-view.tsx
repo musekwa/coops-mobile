@@ -21,7 +21,7 @@ export default function CustomSafeAreaView({ children, edges, mode, style }: Cus
 			edges={filteredEdges}
 			mode={mode}
 			style={[{ flex: 1, paddingTop: -10 }, style]}
-			className={`flex-1 bg-${backgroundColor} px-3`}
+			className={`flex-1 bg-${backgroundColor}`}
 		>
 			<View style={{ paddingTop: 0, paddingBottom: 0, flex: 1, width: '100%',minHeight: '100%' }}>{children}</View>
 		</SafeAreaView>

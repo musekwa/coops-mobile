@@ -18,11 +18,14 @@ export default function CategoryItem({ category }: { category: Props }) {
 	// Provide href according to ActoryCategory
 	const segment: string = match(category.actorCategory)
 		.with(ActorCategory.FARMER, () => `farmers`)
-		.with(ActorCategory.TRADER, () => `traders`)
-		.with(ActorCategory.EXPORTER, () => `traders/exporters`)
-		.with(ActorCategory.PROCESSOR, () => `traders/processors`)
-		.with(ActorCategory.GROUP, () => `groups`)
-		.with(ActorCategory.SERVICE_PROVIDER, () => `farmers/service-providers`)
+		// .with(ActorCategory.TRADER, () => `traders`)
+		// .with(ActorCategory.EXPORTER, () => `traders/exporters`)
+		// .with(ActorCategory.PROCESSOR, () => `traders/processors`)
+		// .with(ActorCategory.GROUP, () => `groups`)
+		// .with(ActorCategory.SERVICE_PROVIDER, () => `farmers/service-providers`)
+		.with(ActorCategory.COOP_UNION, () => `groups/coop-unions`)
+		.with(ActorCategory.ASSOCIATION, () => `groups/associations`)
+		.with(ActorCategory.COOPERATIVE, () => `groups/cooperatives`)
 		.run()
 
 	return (

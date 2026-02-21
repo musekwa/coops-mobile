@@ -108,7 +108,8 @@
           "project": "connectcaju",
           "organization": "iam-ip"
         }
-      ]
+      ],
+      "@sentry/react-native"
     ],
     "experiments": {
       "typedRoutes": true,

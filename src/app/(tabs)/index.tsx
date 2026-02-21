@@ -9,10 +9,10 @@ import * as Animatable from 'react-native-animatable'
 import { Image } from 'expo-image'
 
 // Constants
-import { actorOrganizationsImageUri, farmerCategoryImageUri, warehouseImageUri } from 'src/constants/imageURI'
+import { actorOrganizationsImageUri, farmerCategoryImageUri } from 'src/constants/imageURI'
 
 // Types
-import { CashewWarehouseType, MultiCategory, OrganizationTypes } from 'src/types'
+import { MultiCategory, OrganizationTypes } from 'src/types'
 
 import { useRouter } from 'expo-router'
 import { useQueryMany, useUserDetails } from 'src/hooks/queries'
@@ -24,6 +24,7 @@ import { Session } from '@supabase/supabase-js'
 import RouteProtection from 'src/components/auth/route-protection'
 import useUserDistrict from 'src/hooks/useUserDistrict'
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
+import CustomSafeAreaView from 'src/components/layouts/safe-area-view'
 
 // Custom hook for data processing
 const useProcessedData = (userDetails: UserDetailsRecord | null) => {
@@ -34,14 +35,6 @@ const useProcessedData = (userDetails: UserDetailsRecord | null) => {
 			smallScaleFarmerCount: number
 			largeScaleFarmerCount: number
 			sprayingServiceProviderCount: number
-		}>
-	>([])
-	const [warehousesByAdminPost, setWarehousesByAdminPost] = useState<
-		Array<{
-			adminPost: { id: string; name: string }
-			buyingPointCount: number
-			aggregationPointCount: number
-			destinationPointCount: number
 		}>
 	>([])
 	const [organizationsByAdminPost, setOrganizationsByAdminPost] = useState<
@@ -109,29 +102,6 @@ const useProcessedData = (userDetails: UserDetailsRecord | null) => {
 			: '',
 	)
 
-	const {
-		data: warehouses,
-		isLoading: isWarehousesLoading,
-		error: warehousesError,
-		isError: isWarehousesError,
-	} = useQueryMany<{
-		id: string
-		admin_post_id: string
-		warehouse_type: CashewWarehouseType
-	}>(
-		shouldQuery
-			? `
-		SELECT 
-			wd.id as id,
-			wd.type as warehouse_type,
-			ad.admin_post_id as admin_post_id
-		FROM ${TABLES.WAREHOUSE_DETAILS} wd
-		LEFT JOIN ${TABLES.ADDRESS_DETAILS} ad 
-			ON ad.owner_id = wd.id AND ad.owner_type = 'WAREHOUSE'
-		WHERE ad.district_id = '${districtId}'
-	`
-			: '',
-	)
 
 	// Only fetch admin posts if PowerSync is ready
 	useEffect(() => {
@@ -163,8 +133,7 @@ const useProcessedData = (userDetails: UserDetailsRecord | null) => {
 		if (
 			!Array.isArray(foundAdminPosts) ||
 			!Array.isArray(farmers) ||
-			!Array.isArray(organizations) ||
-			!Array.isArray(warehouses)
+			!Array.isArray(organizations)
 		) {
 			return
 		}
@@ -172,7 +141,6 @@ const useProcessedData = (userDetails: UserDetailsRecord | null) => {
 		const results = foundAdminPosts.map((post) => {
 			const postFarmers = (farmers || []).filter((farmer) => farmer?.admin_post_id == post.id)
 			const postOrganizations = (organizations || []).filter((organization) => organization?.admin_post_id == post.id)
-			const postWarehouses = (warehouses || []).filter((warehouse) => warehouse?.admin_post_id == post.id)
 
 			return {
 				farmers: {
@@ -185,17 +153,6 @@ const useProcessedData = (userDetails: UserDetailsRecord | null) => {
 					).length,
 					sprayingServiceProviderCount: postFarmers.filter((farmer) =>
 						farmer.multicategory?.includes(MultiCategory.FARMER_SPRAYING_SERVICE_PROVIDER),
-					).length,
-				},
-				warehouses: {
-					adminPost: post,
-					buyingPointCount: postWarehouses.filter((warehouse) => warehouse.warehouse_type == CashewWarehouseType.BUYING)
-						.length,
-					aggregationPointCount: postWarehouses.filter(
-						(warehouse) => warehouse.warehouse_type == CashewWarehouseType.AGGREGATION,
-					).length,
-					destinationPointCount: postWarehouses.filter(
-						(warehouse) => warehouse.warehouse_type == CashewWarehouseType.DESTINATION,
 					).length,
 				},
 				organizations: {
@@ -214,30 +171,9 @@ const useProcessedData = (userDetails: UserDetailsRecord | null) => {
 		})
 
 		setFarmersByAdminPost(results.map((r) => r.farmers))
-		setWarehousesByAdminPost(results.map((r) => r.warehouses))
 		setOrganizationsByAdminPost(results.map((r) => r.organizations))
-	}, [shouldQuery, foundAdminPosts, farmers, organizations, warehouses])
+	}, [shouldQuery, foundAdminPosts, farmers, organizations])
 
-	const computedWarehouses = useMemo(
-		() => [
-			{
-				name: 'Postos de Compra',
-				icon: 'person',
-				count: warehousesByAdminPost.reduce((sum, post) => sum + post.buyingPointCount, 0),
-			},
-			{
-				name: 'Armazéns de Trânsito',
-				icon: 'person',
-				count: warehousesByAdminPost.reduce((sum, post) => sum + post.aggregationPointCount, 0),
-			},
-			{
-				name: 'Armazéns de Destino',
-				icon: 'person',
-				count: warehousesByAdminPost.reduce((sum, post) => sum + post.destinationPointCount, 0),
-			},
-		],
-		[warehousesByAdminPost],
-	)
 
 	const computedFarmers = useMemo(
 		() => [
@@ -283,9 +219,7 @@ const useProcessedData = (userDetails: UserDetailsRecord | null) => {
 
 	return {
 		farmersByAdminPost,
-		warehousesByAdminPost,
 		organizationsByAdminPost,
-		computedWarehouses,
 		computedFarmers,
 		computedOrganizations,
 		// isLoading,
@@ -293,10 +227,10 @@ const useProcessedData = (userDetails: UserDetailsRecord | null) => {
 	}
 }
 
-// Table Skeleton Component
-const TableSkeleton = () => (
-	<View className="flex flex-col border p-2 rounded-lg border-gray-200 dark:border-gray-700">
-		<View className="flex flex-row items-center">
+// Card Skeleton Component
+const CardSkeleton = () => (
+	<View className="border rounded-lg border-gray-200 dark:border-gray-700 p-4 mb-3 bg-white dark:bg-gray-800">
+		<View className="flex flex-row items-center mb-3">
 			<CustomShimmerPlaceholder
 				style={{
 					width: 24,
@@ -316,205 +250,236 @@ const TableSkeleton = () => (
 				}}
 			/>
 		</View>
-		<View className="flex-1 flex-col justify-between mt-2">
-			{/* Header row skeleton */}
-			<View className="flex-1 flex-row justify-between border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-				{[1, 2, 3, 4].map((_, index) => (
-					<CustomShimmerPlaceholder
-						key={index}
-						style={{
-							width: '23%',
-							height: 20,
-							borderRadius: 4,
-							margin: 4,
-						}}
-					/>
-				))}
-			</View>
-
-			{/* Data rows skeleton */}
-			{[1, 2, 3].map((_, rowIndex) => (
-				<View
-					key={rowIndex}
-					className={`flex-1 flex-row justify-between border-b border-gray-200 dark:border-gray-700 ${
-						rowIndex % 2 === 0 ? 'bg-white dark:bg-black' : 'bg-gray-50 dark:bg-gray-900'
-					}`}
-				>
-					{[1, 2, 3, 4].map((_, colIndex) => (
-						<CustomShimmerPlaceholder
-							key={colIndex}
-							style={{
-								width: '23%',
-								height: 16,
-								borderRadius: 4,
-								margin: 4,
-							}}
-						/>
-					))}
-				</View>
-			))}
-
-			{/* Total row skeleton */}
-			<View className="flex-1 flex-row justify-between border-t-2 border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800">
+		<View className="flex-row flex-wrap gap-2">
+			{[1, 2, 3].map((_, index) => (
 				<CustomShimmerPlaceholder
+					key={index}
 					style={{
-						width: '23%',
-						height: 20,
-						borderRadius: 4,
-						margin: 4,
+						width: 100,
+						height: 60,
+						borderRadius: 8,
 					}}
 				/>
-				{[1, 2, 3].map((_, index) => (
-					<CustomShimmerPlaceholder
-						key={index}
-						style={{
-							width: '23%',
-							height: 20,
-							borderRadius: 4,
-							margin: 4,
-						}}
-					/>
-				))}
-			</View>
+			))}
 		</View>
 	</View>
 )
 
-// Reusable table component
-const DataTable = ({
+// Helper function to get icon for each label
+const getIconForLabel = (label: string): string => {
+	const iconMap: { [key: string]: string } = {
+		// Farmers
+		'Familiares': 'home-outline',
+		'Comerciais': 'business-outline',
+		'Prov. Serviços': 'construct-outline',
+		// Organizations
+		'Cooperativas': 'people-outline',
+		'Associações': 'people-circle-outline',
+		'Uniões': 'link-outline',
+	}
+	return iconMap[label] || 'ellipse-outline'
+}
+
+// Summary Stats Component - Shows totals at the top
+const SummaryStats = ({
+	totals,
 	title,
 	iconUri,
-	headers,
-	data,
-	totals,
 	isLoading,
 }: {
+	totals: any[]
 	title: string
 	iconUri: string
-	headers: string[]
-	data: any[]
-	totals: any[]
 	isLoading: boolean
 }) => {
-	// Helper function to extract values from data items
-	const extractValues = (item: any) => {
-		// Handle farmers data structure
-		if (item.adminPost && typeof item.adminPost === 'object' && item.smallScaleFarmerCount !== undefined) {
-			return [
-				item.adminPost.name || '',
-				item.smallScaleFarmerCount || 0,
-				item.largeScaleFarmerCount || 0,
-				item.sprayingServiceProviderCount || 0,
-			]
-		}
-
-		// Handle organizations data structure
-		if (item.adminPost && typeof item.adminPost === 'object' && item.cooperativeCount !== undefined) {
-			return [item.adminPost.name || '', item.cooperativeCount || 0, item.associationCount || 0, item.unionCount || 0]
-		}
-
-		// Handle warehouses data structure
-		if (item.adminPost && typeof item.adminPost === 'object' && item.buyingPointCount !== undefined) {
-			return [
-				item.adminPost.name || '',
-				item.buyingPointCount || 0,
-				item.aggregationPointCount || 0,
-				item.destinationPointCount || 0,
-			]
-		}
-
-		// Fallback: try to use Object.values if they're all primitive
-		const values = Object.values(item)
-		if (values.every((val) => typeof val === 'string' || typeof val === 'number')) {
-			return values
-		}
-
-		// Last resort: return empty array
-		return []
+	if (isLoading) {
+		return (
+			<View className="mb-4">
+				<View className="flex-row items-center mb-3">
+					<CustomShimmerPlaceholder style={{ width: 40, height: 40, borderRadius: 20 }} />
+					<CustomShimmerPlaceholder style={{ width: 100, height: 20, borderRadius: 4, marginLeft: 8 }} />
+				</View>
+				<View className="flex-row gap-3">
+					{[1, 2, 3].map((_, i) => (
+						<CustomShimmerPlaceholder key={i} style={{ flex: 1, height: 80, borderRadius: 12 }} />
+					))}
+				</View>
+			</View>
+		)
 	}
 
 	return (
-		<View className="flex flex-col border p-2 rounded-lg border-gray-200 dark:border-gray-700">
-			<View className="flex flex-row items-center">
-				<Image
-					source={{ uri: iconUri }}
-					style={{
-						width: 24,
-						height: 24,
-						borderRadius: 100,
-						borderWidth: 1,
-						borderColor: '#008000',
-						padding: 2,
-					}}
-					contentFit="contain"
-				/>
-				<Text className="text-[#008000] font-semibold text-[14px] p-2">{title}</Text>
-			</View>
-			<View className="flex-1 flex-col justify-between">
-				{/* Header row */}
-				<View className="flex-1 flex-row justify-between border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-					{headers.map((header, index) => (
-						<Text
-							key={index}
-							className={`w-1/4 text-gray-600 dark:text-gray-400 font-semibold text-[10px] ${
-								index < headers.length - 1 ? 'border-r border-gray-200 dark:border-gray-700' : ''
-							} ${index === 0 ? 'p-2' : 'text-center p-2'}`}
-						>
-							{header}
-						</Text>
-					))}
+		<View className="mb-6">
+			<View className="flex-row items-center mb-4">
+				<View className="w-10 h-10 rounded-full bg-[#008000]/10 dark:bg-[#008000]/20 items-center justify-center">
+					<Image
+						source={{ uri: iconUri }}
+						style={{ width: 24, height: 24 }}
+						contentFit="contain"
+					/>
 				</View>
-
-				{isLoading ? (
-					<View className="flex-1 items-center justify-center py-4">
-						<TableSkeleton />
-					</View>
-				) : (
-					<>
-						{/* Data rows */}
-						{data.map((item, index) => {
-							const values = extractValues(item)
-
-							return (
-								<View
-									key={index}
-									className={`flex-1 flex-row justify-between border-b border-gray-200 dark:border-gray-700 ${
-										index % 2 === 0 ? 'bg-white dark:bg-black' : 'bg-gray-50 dark:bg-gray-900'
-									}`}
-								>
-									{values.map((value, valueIndex) => (
-										<Text
-											key={valueIndex}
-											className={`w-1/4 text-gray-600 dark:text-gray-400 text-[10px] ${
-												valueIndex < values.length - 1 ? 'border-r border-gray-200 dark:border-gray-700' : ''
-											} ${valueIndex === 0 ? 'p-2' : 'text-center p-2'}`}
-										>
-											{value}
-										</Text>
-									))}
-								</View>
-							)
-						})}
-
-						{/* Total row */}
-						<View className="flex-1 flex-row justify-between border-t-2 border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800">
-							<Text className="w-1/4 text-gray-700 dark:text-gray-300 font-bold text-[10px] p-2 border-r border-gray-200 dark:border-gray-700">
-								Total
-							</Text>
-							{totals.map((total, index) => (
-								<Text
-									key={index}
-									className={`w-1/4 text-gray-700 dark:text-gray-300 font-bold text-[10px] text-center p-2 ${
-										index < totals.length - 1 ? 'border-r border-gray-200 dark:border-gray-700' : ''
-									}`}
-								>
-									{total.count}
-								</Text>
-							))}
-						</View>
-					</>
-				)}
+				<Text className="text-gray-900 dark:text-white font-bold text-[18px] ml-3">{title}</Text>
 			</View>
+			<View className="flex-row gap-3">
+				{totals.map((total, index) => {
+					const totalCount = totals.reduce((sum, t) => sum + t.count, 0)
+					const percentage = totalCount > 0 ? ((total.count / totalCount) * 100).toFixed(0) : 0
+					
+					return (
+						<Animated.View
+							key={index}
+							entering={FadeIn.duration(300).delay(index * 50)}
+							className="flex-1 bg-[#008000]/10 dark:bg-[#008000]/20 rounded-xl p-4 border border-[#008000]/20 dark:border-[#008000]/30"
+						>
+							<View className="flex-row items-center mb-2">
+								<View className="w-8 h-8 rounded-full bg-[#008000]/20 dark:bg-[#008000]/30 items-center justify-center">
+									<Ionicons 
+										name={getIconForLabel(total.name) as any} 
+										size={16} 
+										color="#008000" 
+									/>
+								</View>
+								<Text className="text-[#008000] dark:text-[#00cc00] text-[10px] ml-2 font-semibold flex-1" numberOfLines={1}>
+									{total.name}
+								</Text>
+							</View>
+							<Text className="text-[#008000] dark:text-[#00cc00] font-bold text-[24px] mb-1">
+								{total.count}
+							</Text>
+							<View className="h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+								<View 
+									className="h-full bg-[#008000] rounded-full"
+									style={{ width: `${percentage}%` as unknown as number }}
+								/>
+							</View>
+						</Animated.View>
+					)
+				})}
+			</View>
+		</View>
+	)
+}
+
+// Card-based component for displaying data
+const DataCard = ({
+	title,
+	iconUri,
+	data,
+	totals,
+	isLoading,
+	labels,
+}: {
+	title: string
+	iconUri: string
+	data: any[]
+	totals: any[]
+	isLoading: boolean
+	labels: string[]
+}) => {
+	return (
+		<View className="flex flex-col rounded-2xl p-5 mb-4 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
+			<View className="flex flex-row items-center justify-between mb-5">
+				<View className="flex flex-row items-center">
+					<View className="w-10 h-10 rounded-full bg-[#008000]/10 dark:bg-[#008000]/20 items-center justify-center">
+						<Image
+							source={{ uri: iconUri }}
+							style={{ width: 24, height: 24 }}
+							contentFit="contain"
+						/>
+					</View>
+					<Text className="text-gray-900 dark:text-white font-bold text-[18px] ml-3">{title}</Text>
+				</View>
+				<View className="flex-row items-center bg-[#008000]/10 dark:bg-[#008000]/20 px-3 py-1 rounded-full">
+					<Ionicons name="stats-chart-outline" size={14} color="#008000" />
+					<Text className="text-[#008000] dark:text-[#00cc00] font-bold text-[12px] ml-1">
+						{totals.reduce((sum, t) => sum + t.count, 0)}
+					</Text>
+				</View>
+			</View>
+
+			{isLoading ? (
+				<CardSkeleton />
+			) : (
+				<>
+					{data.length === 0 ? (
+						<View className="py-8 items-center">
+							<Ionicons name="document-outline" size={48} color="#9CA3AF" />
+							<Text className="text-gray-400 dark:text-gray-500 text-[14px] mt-2">
+								Nenhum dado disponível
+							</Text>
+						</View>
+					) : (
+						<View className="space-y-4">
+							{data.map((item, index) => {
+								// Extract values based on data type
+								let values: { label: string; count: number }[] = []
+								
+								if (item.smallScaleFarmerCount !== undefined) {
+									values = [
+										{ label: labels[0], count: item.smallScaleFarmerCount || 0 },
+										{ label: labels[1], count: item.largeScaleFarmerCount || 0 },
+										{ label: labels[2], count: item.sprayingServiceProviderCount || 0 },
+									]
+								} else if (item.cooperativeCount !== undefined) {
+									values = [
+										{ label: labels[0], count: item.cooperativeCount || 0 },
+										{ label: labels[1], count: item.associationCount || 0 },
+										{ label: labels[2], count: item.unionCount || 0 },
+									]
+								}
+
+								const totalForPost = values.reduce((sum, v) => sum + v.count, 0)
+
+								return (
+									<Animated.View
+										key={index}
+										entering={FadeIn.duration(300).delay(index * 50)}
+										className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+									>
+										<View className="flex flex-row items-center justify-between mb-4">
+											<View className="flex flex-row items-center flex-1">
+												<View className="w-8 h-8 rounded-full bg-[#008000]/10 dark:bg-[#008000]/20 items-center justify-center">
+													<Ionicons name="location" size={16} color="#008000" />
+												</View>
+												<Text className="text-gray-900 dark:text-white font-semibold text-[15px] ml-2 flex-1" numberOfLines={1}>
+													{item.adminPost?.name || 'N/A'}
+												</Text>
+											</View>
+											<View className="bg-[#008000]/10 dark:bg-[#008000]/20 px-2 py-1 rounded-full">
+												<Text className="text-[#008000] dark:text-[#00cc00] font-bold text-[12px]">
+													{totalForPost}
+												</Text>
+											</View>
+										</View>
+										<View className="flex-row gap-2">
+											{values.map((value, valueIndex) => (
+												<View
+													key={valueIndex}
+													className="flex-1 bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700"
+												>
+													<View className="flex flex-row items-center mb-2">
+														<Ionicons 
+															name={getIconForLabel(value.label) as any} 
+															size={12} 
+															color="#008000" 
+														/>
+														<Text className="text-gray-600 dark:text-gray-400 text-[10px] ml-1 flex-1" numberOfLines={1}>
+															{value.label}
+														</Text>
+													</View>
+													<Text className="text-gray-900 dark:text-white font-bold text-[20px]">
+														{value.count}
+													</Text>
+												</View>
+											))}
+										</View>
+									</Animated.View>
+								)
+							})}
+						</View>
+					)}
+				</>
+			)}
 		</View>
 	)
 }
@@ -527,9 +492,7 @@ export default function HomeScreen() {
 	const router = useRouter()
 	const {
 		farmersByAdminPost,
-		warehousesByAdminPost,
 		organizationsByAdminPost,
-		computedWarehouses,
 		computedFarmers,
 		computedOrganizations,
 		// isLoading: isDataLoading,
@@ -555,7 +518,9 @@ export default function HomeScreen() {
 
 	return (
 		<RouteProtection>
-			{/* <CustomSafeAreaView> */}
+			<CustomSafeAreaView
+				edges={['top']}
+			>
 					<Animated.ScrollView
 						entering={FadeIn.duration(300)}
 						exiting={FadeOut.duration(300)}
@@ -576,19 +541,12 @@ export default function HomeScreen() {
 									style={{ textAlign: 'center' }}
 									className="text-[22px] font-bold text-white"
 								>
-									Connect Caju
+									MyCoop
 								</Animatable.Text>
 								<Text className="text-white text-center text-[10px] italic px-10">
-									Digitalizando o sector de amêndoas em Moçambique
+									Promovendo o cooperativismo em Moçambique
 								</Text>
 							</View>
-
-							{/* <Button
-								title="Try!"
-								onPress={() => {
-									Sentry.captureException(new Error('First error'))
-								}}
-							/> */}
 							<View className="h-[50px] flex flex-row items-center justify-between space-x-6 px-3">
 								<View className="flex flex-row items-center space-x-1 w-1/2">
 									<Ionicons name="location-outline" size={20} color="white" />
@@ -598,33 +556,51 @@ export default function HomeScreen() {
 								</View>
 							</View>
 						</View>
-						<View className="flex-1 py-4 space-y-3 justify-center px-3 rounded-t-3xl bg-white dark:bg-black">
-							<DataTable
-								title="Produtores"
-								iconUri={farmerCategoryImageUri}
-								headers={['Posto Admin.', 'Familiares', 'Comerciais', 'Prov. Serviços']}
-								data={farmersByAdminPost}
-								totals={computedFarmers}
-								isLoading={isUserDetailsLoading}
-							/>
-							<DataTable
-								title="Grupos"
-								iconUri={actorOrganizationsImageUri}
-								headers={['Posto Admin.', 'Cooperativas', 'Associações', 'Uniões']}
-								data={organizationsByAdminPost}
-								totals={computedOrganizations}
-								isLoading={isUserDetailsLoading}
-							/>
-							<DataTable
-								title="Armazéns e Postos de Compra"
-								iconUri={warehouseImageUri}
-								headers={['Posto Admin.', 'Postos de Compra', 'Armazéns de Trânsito', 'Armazéns de Destino']}
-								data={warehousesByAdminPost}
-								totals={computedWarehouses}
-								isLoading={isUserDetailsLoading}
-							/>
+						<View className="flex-1 py-6 px-4 rounded-t-3xl bg-gray-50 dark:bg-black">
+							{/* Summary Statistics Section */}
+							<View className="mb-6">
+								<Text className="text-gray-900 dark:text-white font-bold text-[20px] mb-4">
+									Visão Geral
+								</Text>
+								<SummaryStats
+									title="Produtores"
+									iconUri={farmerCategoryImageUri}
+									totals={computedFarmers}
+									isLoading={isUserDetailsLoading}
+								/>
+								<SummaryStats
+									title="Grupos"
+									iconUri={actorOrganizationsImageUri}
+									totals={computedOrganizations}
+									isLoading={isUserDetailsLoading}
+								/>
+							</View>
+
+							{/* Detailed Breakdown Section */}
+							<View className="mb-2">
+								<Text className="text-gray-900 dark:text-white font-bold text-[20px] mb-4">
+									Detalhes por Posto Administrativo
+								</Text>
+								<DataCard
+									title="Produtores"
+									iconUri={farmerCategoryImageUri}
+									labels={['Familiares', 'Comerciais', 'Prov. Serviços']}
+									data={farmersByAdminPost}
+									totals={computedFarmers}
+									isLoading={isUserDetailsLoading}
+								/>
+								<DataCard
+									title="Grupos"
+									iconUri={actorOrganizationsImageUri}
+									labels={['Cooperativas', 'Associações', 'Uniões']}
+									data={organizationsByAdminPost}
+									totals={computedOrganizations}
+									isLoading={isUserDetailsLoading}
+								/>
+							</View>
 						</View>
 					</Animated.ScrollView>
+				</CustomSafeAreaView>
 				<StatusBar style="light" />
 		</RouteProtection>
 	)
