@@ -1,4 +1,4 @@
-import { View, Text, Modal } from 'react-native'
+import { View, Text, Modal, ScrollView } from 'react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { OrganizationTypes, ResourceName } from 'src/types'
 import { match } from 'ts-pattern'
@@ -34,6 +34,7 @@ import {
 import { buildActorDetails } from 'src/library/powersync/schemas/actor_details'
 import { buildBirthDate } from 'src/library/powersync/schemas/birth_dates'
 import { buildActorCategories } from 'src/library/powersync/schemas/actor_categories'
+import CustomSafeAreaView from '../layouts/safe-area-view'
 
 type OrganizationDataPreviewProps = {
 	previewData: boolean
@@ -226,13 +227,19 @@ export default function OrganizationDataPreview({
 				routeSegment = 'coop-unions'
 			} else if (organizationType === OrganizationTypes.ASSOCIATION) {
 				routeSegment = 'associations'
-			} else {
+			} else if (organizationType === OrganizationTypes.COOPERATIVE) {
 				routeSegment = 'cooperatives'
+			}
+			else {
+				routeSegment = ''
 			}
 
 			resetAddress()
 
-			router.replace(`/(tabs)/actors/groups/${routeSegment}` as Href)
+			// Defer navigation to avoid crash when unmounting Modal during transition
+			setTimeout(() => {
+				router.replace(`/(tabs)/actors/${routeSegment}` as Href)
+			}, 100)
 		} catch (error) {
 			setHasError(true)
 			setErrorMessage(errorMessages.failedToSave)
@@ -244,11 +251,16 @@ export default function OrganizationDataPreview({
 	}, [userDetails, previewData, org, organizationType, resetFormData])
 
 	return (
-		<Modal visible={previewData} presentationStyle="overFullScreen">
-			<View className="flex-1 w-full bg-white dark:bg-black p-3 justify-center ">
+		<Modal visible={previewData} animationType="fade" presentationStyle="overFullScreen">
+			<CustomSafeAreaView>
+
+			<ScrollView 
+				showsVerticalScrollIndicator={false} 
+				contentContainerStyle={{ paddingBottom: 80, paddingTop: 10, paddingHorizontal: 16 }}
+			>
 				<View className="h-8 flex flex-row justify-between space-x-2 ">
 					<View className="flex-1 items-center justify-center">
-						<Text className="text-[16px] font-bold text-black dark:text-white ">Confirmar Dados</Text>
+						<Text className="text-[14px] font-bold text-black dark:text-white ">Confirmar Dados</Text>
 					</View>
 				</View>
 				{organizationType === OrganizationTypes.COOPERATIVE && (
@@ -288,7 +300,8 @@ export default function OrganizationDataPreview({
 					setMessage={setErrorMessage}
 					setVisible={setHasError}
 				/>
-			</View>
+			</ScrollView>
+			</CustomSafeAreaView>
 		</Modal>
 	)
 }

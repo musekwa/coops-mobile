@@ -1,8 +1,7 @@
 import { useColorScheme } from 'nativewind'
 import { useFarmerStore } from 'src/store/farmer'
 import { Href, useNavigation, useRouter } from 'expo-router'
-import Animated, { FadeIn } from 'react-native-reanimated'
-import { View } from 'react-native'
+import { View, ScrollView } from 'react-native'
 import FormFieldPreview from 'src/components/data-preview/FormFieldPreview'
 import { capitalize } from 'src/helpers/capitalize'
 import { Divider } from 'react-native-paper'
@@ -37,6 +36,8 @@ import { buildActorDetails } from 'src/library/powersync/schemas/actor_details'
 import { buildGenders } from 'src/library/powersync/schemas/genders'
 import { buildActorCategories } from 'src/library/powersync/schemas/actor_categories'
 import CustomSafeAreaView from 'src/components/layouts/safe-area-view'
+
+
 export default function SaveFarmer() {
 	const { userDetails } = useUserDetails()
 	const isDarkMode = useColorScheme().colorScheme === 'dark'
@@ -56,12 +57,12 @@ export default function SaveFarmer() {
 		nationality,
 	} = useAddressStore()
 
-	const [isPowersyncConnected, setIsPowersyncConnected] = useState<boolean>(false)
+
 	const [hasError, setHasError] = useState<boolean>(false)
 	const [errorMessage, setErrorMessage] = useState<string>('')
 	const [success, setSuccess] = useState<boolean>(false)
 	const { formData: farmer, resetFormData } = useFarmerStore()
-	const navigation = useNavigation()
+
 	const farmerCategory = match(farmer.isSmallScale)
 		.with('YES', () => 'Familiar')
 		.with('NO', () => 'Comercial')
@@ -80,12 +81,6 @@ export default function SaveFarmer() {
 	const [countryName, setCountryName] = useState<string>('')
 	const [isSaving, setIsSaving] = useState<boolean>(false)
 
-	const { showInfo } = useToast()
-
-	useEffect(() => {
-		const connected = powersync.connected
-		setIsPowersyncConnected(connected)
-	}, [])
 
 	// Fetch address names when component mounts or fullAddress changes
 	useEffect(() => {
@@ -346,9 +341,11 @@ export default function SaveFarmer() {
 			}
 			resetFormData()
 			resetAddress()
-			router.replace('/(tabs)/actors/farmers' as Href)
 			setSuccess(true)
-			resetFormData()
+			// Defer navigation to avoid Reanimated crash when unmounting during animation
+			setTimeout(() => {
+				router.replace('/(tabs)/actors/farmers' as Href)
+			}, 100)
 		} catch (error: any) {
 			console.error('Error creating farmer', error)
 			setHasError(true)
@@ -365,14 +362,13 @@ export default function SaveFarmer() {
 
 	return (
 		<CustomSafeAreaView edges={['bottom']}>
-		<Animated.ScrollView
+		<ScrollView
 			showsVerticalScrollIndicator={false}
 			contentContainerStyle={{
 				paddingBottom: 80,
 				paddingTop: 10,
 				paddingHorizontal: 16,
 			}}
-			entering={FadeIn.duration(300)}
 		>
 			<View className="flex-1 ">
 				{!farmer.surname.toLowerCase().includes('company') && (
@@ -488,7 +484,7 @@ export default function SaveFarmer() {
 				/>
 				<SuccessAlert visible={success} setVisible={setSuccess} route={'/(tabs)/actors/farmers' as Href} />
 				</View>
-			</Animated.ScrollView>
+			</ScrollView>
 		</CustomSafeAreaView>
 	)
 }

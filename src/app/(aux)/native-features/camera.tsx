@@ -44,10 +44,16 @@ export default function Page() {
 	}
 
 	const handleBack = () => {
-		if (addActionType === ActionType.ADD_TRANSIT_LICENSE_IMAGE) {
+		console.log('currentResource', currentResource)
+		// console.log('addActionType', addActionType)
+		if (currentResource.name === ResourceName.SHIPMENT) {
 			router.navigate('/(aux)/trades/transit/registration')
-		} else if (currentResource.id.length > 10 && currentResource.name !== ResourceName.UNKNOWN) {
-			router.navigate(`/(aux)/actors/${currentResource.name.toLowerCase()}` as Href)
+		} else if (currentResource.id.length > 10 && currentResource.name === ResourceName.FARMER) {
+			router.navigate(`/(aux)/actors/farmer` as Href)
+		} else if (currentResource.id.length > 10 && currentResource.name === ResourceName.GROUP) {
+			router.navigate(`/(aux)/actors/organization` as Href)
+		} else if (currentResource.id.length > 10 && currentResource.name === ResourceName.TRADER) {
+			router.navigate(`/(aux)/actors/trader` as Href)
 		} else {
 			router.back()
 		}

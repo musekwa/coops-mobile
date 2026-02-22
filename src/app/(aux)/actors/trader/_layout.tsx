@@ -161,7 +161,7 @@ function CustomDrawerContent(props: any) {
 						style={{ paddingBottom: Math.max(insets.bottom, 8) }}
 					>
 						<TouchableOpacity
-							onPress={() => router.navigate('/(tabs)/actors/traders')}
+							onPress={() => router.navigate('/(tabs)/actors')}
 							className="flex flex-row space-x-2 items-center "
 						>
 							<Ionicons name="log-out-outline" size={20} color={colors.red} />

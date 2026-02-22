@@ -6,9 +6,9 @@ import { colors } from 'src/constants'
 import { Image } from 'expo-image'
 import { avatarPlaceholderUri } from 'src/constants/imageURI'
 import { Feather, Ionicons } from '@expo/vector-icons'
-import { useNavigation, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import UploadPhoto from 'src/components/images/UploadPhoto'
-import { DrawerActions } from '@react-navigation/native'
+import HeaderAvatar from 'src/components/actors/header-avatar'
 import { useDrawerStatus } from '@react-navigation/drawer'
 import { commercializationCampainsdateRange } from 'src/helpers/dates'
 import { useActionStore } from 'src/store/actions/actions'
@@ -16,7 +16,7 @@ import SingleFloatingButton from 'src/components/buttons/SingleFloatingButton'
 import { GroupManagerPosition, OrganizationTypes } from 'src/types'
 import { cn } from 'src/utils/tailwind'
 import ActorContactInfo from 'src/components/actors/ActorContactInfo'
-import { useQueryMany, useQueryOneAndWatchChanges } from 'src/hooks/queries'
+import { useQueryMany, useQueryOne, useQueryOneAndWatchChanges } from 'src/hooks/queries'
 import { TABLES } from 'src/library/powersync/schemas/AppSchema'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -26,7 +26,6 @@ function CustomDrawerContent(props: any) {
 	const drawerStatus = useDrawerStatus()
 	const isDrawerOpen = drawerStatus === 'open' ? 'open' : 'closed'
 	const router = useRouter()
-	const navigation = useNavigation()
 	const isDarkMode = useColorScheme().colorScheme === 'dark'
 	const [showImageHandleModal, setShowImageHandleModal] = useState(false)
 	const [focalPointContactId, setFocalPointContactId] = useState<string>('')
@@ -132,17 +131,6 @@ function CustomDrawerContent(props: any) {
 		}
 	}, [isDrawerOpen])
 
-	// Force drawer content to update when current resource changes
-	useEffect(() => {
-		// Close and reopen drawer to force refresh
-		if (isDrawerOpen === 'open') {
-			navigation.dispatch(DrawerActions.closeDrawer())
-			setTimeout(() => {
-				navigation.dispatch(DrawerActions.openDrawer())
-			}, 100)
-		}
-	}, [currentResource.id])
-
 	const organizationType =
 		group?.organization_type === OrganizationTypes.COOPERATIVE
 			? 'Cooperativa'
@@ -237,7 +225,7 @@ function CustomDrawerContent(props: any) {
 						style={{ paddingBottom: Math.max(insets.bottom, 8) }}
 					>
 						<TouchableOpacity
-							onPress={() => router.navigate('/(tabs)/actors/groups')}
+							onPress={() => router.navigate('/(tabs)/actors')}
 							className="flex flex-row space-x-2 items-center "
 						>
 							<Ionicons name="log-out-outline" size={20} color={colors.red} />
@@ -260,12 +248,14 @@ function CustomDrawerContent(props: any) {
 
 export default function OrganizationLayout() {
 	const isDarkMode = useColorScheme().colorScheme === 'dark'
-	const navigation = useNavigation()
-	const { getDrawerStatus } = useActionStore()
-	const toggleDrawer = () => {
-		const drawerNavigation = navigation.getParent('Drawer') || navigation
-		drawerNavigation.dispatch(DrawerActions.toggleDrawer())
-	}
+	const { getDrawerStatus, getCurrentResource } = useActionStore()
+
+	const { data: group } = useQueryOne<{ photo: string | null }>(
+		`SELECT ad.photo FROM ${TABLES.ACTORS} a
+		INNER JOIN ${TABLES.ACTOR_DETAILS} ad ON ad.actor_id = a.id
+		WHERE a.id = ? AND a.category = 'GROUP'`,
+		[getCurrentResource().id],
+	)
 
 	return (
 		<>
@@ -279,10 +269,10 @@ export default function OrganizationLayout() {
 					drawerActiveBackgroundColor: isDarkMode ? colors.white : colors.gray100,
 					drawerInactiveTintColor: isDarkMode ? colors.white : colors.black,
 					drawerLabelStyle: {
-						// fontWeight: 'bold',
 						fontSize: 14,
 						marginLeft: -20,
 					},
+					headerLeft: () => <HeaderAvatar photoUri={group?.photo} />,
 					headerStyle: {
 						backgroundColor: isDarkMode ? colors.black : colors.white,
 						elevation: 0,

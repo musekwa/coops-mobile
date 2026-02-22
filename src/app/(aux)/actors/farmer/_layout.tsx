@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Drawer } from 'expo-router/drawer'
+import { DrawerActions } from '@react-navigation/native'
 import { useColorScheme } from 'nativewind'
 import { colors } from 'src/constants'
 import { Image } from 'expo-image'
@@ -19,6 +20,9 @@ import { useQueryOne, useQueryOneAndWatchChanges } from 'src/hooks/queries'
 import { StatusBar } from 'expo-status-bar'
 import { ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import HeaderAvatar from 'src/components/actors/header-avatar'
+
+
 
 function CustomDrawerContent(props: any) {
 	const { setDrawerStatus, getCurrentResource } = useActionStore()
@@ -82,6 +86,7 @@ function CustomDrawerContent(props: any) {
 					<View className="flex items-center relative">
 						<Image
 							source={{ uri: farmer?.photo ? farmer?.photo : avatarPlaceholderUri }}
+							contentFit="cover"
 							style={{
 								width: 120,
 								height: 120,
@@ -202,12 +207,13 @@ export default function FarmerLayout() {
 	} = useQueryOne<{
 		other_names: string
 		surname: string
-	}>(`SELECT other_names, surname FROM ${TABLES.ACTOR_DETAILS} WHERE actor_id = ?`, [getCurrentResource().id])
+		photo: string | null
+	}>(`SELECT other_names, surname, photo FROM ${TABLES.ACTOR_DETAILS} WHERE actor_id = ?`, [getCurrentResource().id])
 
 	return (
 		<>
 			<Drawer
-				initialRouteName="profile"
+				initialRouteName="performance"
 				drawerContent={CustomDrawerContent}
 				screenOptions={{
 					drawerType: 'front',
@@ -217,10 +223,10 @@ export default function FarmerLayout() {
 					drawerActiveBackgroundColor: isDarkMode ? colors.white : colors.gray100,
 					drawerInactiveTintColor: isDarkMode ? colors.white : colors.black,
 					drawerLabelStyle: {
-						// fontWeight: 'bold',
 						fontSize: 14,
 						marginLeft: -20,
 					},
+					headerLeft: () => <HeaderAvatar photoUri={farmer?.photo} />,
 					headerStyle: {
 						backgroundColor: isDarkMode ? colors.lightblack : colors.white,
 						elevation: 0,
@@ -233,15 +239,15 @@ export default function FarmerLayout() {
 				}}
 			>
 				<Drawer.Screen
-					name="profile"
+					name="performance"
 					options={{
-						drawerLabel: 'Actividades',
+						drawerLabel: 'Produção',
 						headerTitle: () => (
 							<View>
 								<Text className="text-[16px] font-bold text-center text-black dark:text-white">
 									{commercializationCampainsdateRange}
 								</Text>
-								<Text className="text-[12px] text-gray-500 text-center">Actidades</Text>
+								<Text className="text-[12px] text-gray-500 text-center">Produção</Text>
 							</View>
 						),
 						headerTitleAlign: 'center',

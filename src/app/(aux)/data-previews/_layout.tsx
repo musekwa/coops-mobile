@@ -18,7 +18,7 @@ export default function DataPreviewsLayout() {
                     headerLeft: () => <BackButton />,
                 }} />
 
-            <Stack.Screen name="save-association" 
+            <Stack.Screen name="save-organization" 
             options={{ 
                     headerShown: true, 
                     headerTitle: 'Confirmar Dados',
@@ -29,27 +29,6 @@ export default function DataPreviewsLayout() {
                     headerLeft: () => <BackButton />,
                 }} />
 
-            <Stack.Screen name="save-cooperative" 
-            options={{ 
-                    headerShown: true, 
-                    headerTitle: 'Confirmar Dados',
-                    headerStyle: headerStyle,
-                    headerTitleAlign: 'center',
-                    headerTitleStyle: headerTitleStyle,
-                    headerShadowVisible: false,
-                    headerLeft: () => <BackButton />,
-                }} />
-
-            <Stack.Screen name="save-coop-union" 
-            options={{ 
-                    headerShown: true, 
-                    headerTitle: 'Confirmar Dados',
-                    headerStyle: headerStyle,
-                    headerTitleAlign: 'center',
-                    headerTitleStyle: headerTitleStyle,
-                    headerShadowVisible: false,
-                    headerLeft: () => <BackButton />,
-                }} />
         </Stack>
     )
 }

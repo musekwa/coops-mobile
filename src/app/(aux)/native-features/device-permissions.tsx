@@ -89,13 +89,26 @@ export default function PermissionsScreen() {
 		if (request) await requestMediaLibraryPermission()
 	}
 
+	const handleBackNavigationUrl = () => {
+		if (currentResource.id.length > 10 && currentResource.name === ResourceName.SHIPMENT) {
+			return '/(aux)/trades/transit/registration'
+		} else if (currentResource.id.length > 10 && currentResource.name === ResourceName.FARMER) {
+			return '/(aux)/actors/farmer'
+		} else if (currentResource.id.length > 10 && currentResource.name === ResourceName.GROUP) {
+			return '/(aux)/actors/organization'
+		} else if (currentResource.id.length > 10 && currentResource.name === ResourceName.TRADER) {
+			return '/(aux)/actors/trader'
+		}
+		return '/(tabs)'
+	}
+
 	const allGranted =
 		hasCameraPermission && (mediaLibraryPermission?.granted ?? false)
 
 	useHeaderOptions({}, 'Permissões');
 	useEffect(() => {
-		const backNavigationUrl = addActionType === ActionType.ADD_TRANSIT_LICENSE_IMAGE 
-		? '/(aux)/trades/transit/registration' : currentResource.id.length > 10 && currentResource.name !== ResourceName.UNKNOWN ? `/(aux)/actors/${currentResource.name.toLowerCase()}` : '/(tabs)'
+		
+		const backNavigationUrl = handleBackNavigationUrl()
 		navigation.setOptions({
 			headerLeft: () => <BackButton route={backNavigationUrl as RelativePathString} />,
 		})
@@ -106,6 +119,7 @@ export default function PermissionsScreen() {
 			router.navigate('/(aux)/native-features/camera' as Href)
 			return
 		}
+
 		setErrorMessage('Pretende continuar sem permissões?')
 		setHasError(true)
 	}
@@ -113,7 +127,8 @@ export default function PermissionsScreen() {
 	const handleContinueWithoutPermissions = () => {
 		setHasError(false)
 		setErrorMessage('')
-		router.navigate('/(aux)/native-features/camera' as Href)
+		const backNavigationUrl = handleBackNavigationUrl()
+		router.navigate(backNavigationUrl as Href)
 	}
 
 	const handleDismissDialog = () => {
